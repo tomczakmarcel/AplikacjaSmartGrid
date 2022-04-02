@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "dgSpecHash": "15AxDGKuDmvKFW+C+onot3pMEIhcc+qUki8A9Dwu/VLOa+Mm+tE88dab6r0K+PzDfP+msHDoJH9n3YV5iYczRw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Marcel\\source\\repos\\AplikacjaSmartGrid\\AplikacjaSmartGrid.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Marcel\\.nuget\\packages\\chartjs.blazor.fork\\2.0.2\\chartjs.blazor.fork.2.0.2.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\lumenworks.framework.io\\3.8.0\\lumenworks.framework.io.3.8.0.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.authorization\\3.1.8\\microsoft.aspnetcore.authorization.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.components\\3.1.8\\microsoft.aspnetcore.components.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.components.analyzers\\3.1.8\\microsoft.aspnetcore.components.analyzers.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.components.forms\\3.1.8\\microsoft.aspnetcore.components.forms.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.components.web\\3.1.8\\microsoft.aspnetcore.components.web.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.aspnetcore.metadata\\3.1.8\\microsoft.aspnetcore.metadata.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\3.1.8\\microsoft.extensions.dependencyinjection.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\3.1.8\\microsoft.extensions.dependencyinjection.abstractions.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\3.1.8\\microsoft.extensions.logging.abstractions.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.extensions.options\\3.1.8\\microsoft.extensions.options.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.extensions.primitives\\3.1.8\\microsoft.extensions.primitives.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\microsoft.jsinterop\\3.1.8\\microsoft.jsinterop.3.1.8.nupkg.sha512",
+    "C:\\Users\\Marcel\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Pakiet „LumenWorks.Framework.IO 3.8.0” został przywrócony przy użyciu elementu „.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8” zamiast platformy docelowej projektu „net6.0”. Ten pakiet może nie być w pełni kompatybilny z Twoim projektem.",
+      "libraryId": "LumenWorks.Framework.IO",
+      "targetGraphs": [
+        "net6.0"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,531 @@
+﻿@page "/"
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.BarChart
+@using System.Drawing
+@inject NavigationManager NavManager
+
+<PageTitle>Strona Główna</PageTitle>
+<div class="d-flex justify-content-center"><h1>Smart Grid App</h1></div>
+
+
+<div class="row">
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config" @ref="_chart"></Chart>
+    <button @onclick="RedirectToUseOfEnergySite">Aktualizuj zużycie</button>
+    </div>
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config2" @ref="_chart2"></Chart>
+
+    <button @onclick="RandomizeData">Randomize Data</button>
+    <button @onclick="AddDataset">Add Dataset</button>
+    <button @onclick="RemoveDataset">Remove Dataset</button>
+    <button @onclick="AddData">Add Data</button>
+    <button @onclick="RemoveData">Remove Data</button>
+    </div>
+        <div class="col-sm" justify-content-center>
+    <Chart Config="_config3" @ref="_chart3"></Chart>
+
+    <button @onclick="RandomizeData">Randomize Data</button>
+    <button @onclick="AddDataset">Add Dataset</button>
+    <button @onclick="RemoveDataset">Remove Dataset</button>
+    <button @onclick="AddData">Add Data</button>
+    <button @onclick="RemoveData">Remove Data</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config4" @ref="_chart4"></Chart>
+
+    <button @onclick="RandomizeData">Randomize Data</button>
+    <button @onclick="AddDataset">Add Dataset</button>
+    <button @onclick="RemoveDataset">Remove Dataset</button>
+    <button @onclick="AddData">Add Data</button>
+    <button @onclick="RemoveData">Remove Data</button>
+    </div>
+        <div class="col-sm justify-content-center">
+    <Chart Config="_config5" @ref="_chart5"></Chart>
+
+    <button @onclick="RandomizeData">Randomize Data</button>
+    <button @onclick="AddDataset">Add Dataset</button>
+    <button @onclick="RemoveDataset">Remove Dataset</button>
+    <button @onclick="AddData">Add Data</button>
+    <button @onclick="RemoveData">Remove Data</button>
+    </div>
+        <div class="col-sm" justify-content-center>
+    <Chart Config="_config6" @ref="_chart6"></Chart>
+
+    <button @onclick="RandomizeData">Randomize Data</button>
+    <button @onclick="AddDataset">Add Dataset</button>
+    <button @onclick="RemoveDataset">Remove Dataset</button>
+    <button @onclick="AddData">Add Data</button>
+    <button @onclick="RemoveData">Remove Data</button>
+    </div>
+</div>
+
+@code {
+    private const int InitalCount = 7;
+    private LineConfig _config;
+    private Chart _chart;
+    private LineConfig _config2;
+    private Chart _chart2;
+    private LineConfig _config3;
+    private Chart _chart3;
+    private BarConfig _config4;
+    private Chart _chart4;
+    private LineConfig _config5;
+    private Chart _chart5;
+    private LineConfig _config6;
+    private Chart _chart6;
+
+    List<UserUsageModel> userUsageModel = ImportCSV.ReturnList();
+
+
+
+    protected override void OnInitialized()
+    {
+        Dictionary<string, double[]> test = new Dictionary<string, double[]>();
+        List<String> ppes = new List<String>();
+        List<string> time = new List<string>();
+        List<double> usageOf1Key = new List<double>();
+        List<String> osx = new List<String>();
+        GetDatasetService getDatasetService = new GetDatasetService();
+
+        _config = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Aktualne zużycie"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Time"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Kw/h"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        _config2 = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Własne zużycie"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Month"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        _config3 = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Zewnętrzne źródła"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Month"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        _config4 = new BarConfig
+        {
+            Options = new BarOptions
+            {
+                Responsive = true,
+                Legend = new Legend
+                {
+                    Position = Position.Top
+                },
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Bilans Końcowy Energii"
+                }
+            }
+        };
+
+        _config5 = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "CO2/kWh"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Month"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        _config6 = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Naładowanie akumulatorów aut elektrycznych"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Month"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        IDataset<int> dataset1 = new LineDataset<int>(RandomScalingFactor(InitalCount))
+        {
+            Label = "My first dataset",
+            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Red),
+            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Red),
+            Fill = FillingMode.Disabled
+        };
+
+        IDataset<int> dataset2 = new LineDataset<int>(RandomScalingFactor(InitalCount))
+        {
+            Label = "My second dataset",
+            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            Fill = FillingMode.Disabled
+        };
+
+        IDataset<double> datasetUserUsage = new LineDataset<double>()
+        {
+            Label = "My second dataset",
+            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            Fill = FillingMode.Disabled
+        };
+
+        ppes = getDatasetService.GetAllClients(userUsageModel);
+        time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);
+        foreach (string client in ppes)
+        {
+            LineDataset<double> dataset = new LineDataset<double>();
+            dataset = getDatasetService.GetDataset(userUsageModel, client);
+            if (dataset.Count == 23519)
+            {
+                            dataset.Label = client;
+            _config.Options.Scales.YAxes = new List<CartesianAxis>
+                                    {
+                                            new LinearCartesianAxis
+                                            {
+                                                ScaleLabel = new ScaleLabel
+                                                {
+                                                    LabelString = "Time"
+                                                },
+                                                GridLines = new GridLines
+                                                {
+                                                    Display = false
+                                                },
+                                                Ticks = new LinearCartesianTicks
+                                                {
+                                                    Min = 0,
+                                                    Max = 1
+                                                }
+                                            }
+                                        };
+                _config.Data.Datasets.Add(dataset);
+            }
+        }
+
+        _config.Data.Labels.AddRange(time);
+        var test3 = _config;
+        _config2.Data.Labels.AddRange(Months.Take(InitalCount));
+        _config2.Data.Datasets.Add(dataset1);
+        _config3.Data.Labels.AddRange(Months.Take(InitalCount));
+        _config3.Data.Datasets.Add(dataset2);
+        _config5.Data.Labels.AddRange(Months.Take(InitalCount));
+        _config5.Data.Datasets.Add(dataset2);
+        _config6.Data.Labels.AddRange(Months.Take(InitalCount));
+        _config6.Data.Datasets.Add(dataset1);
+
+        IDataset<int> dataset3 = new BarDataset<int>(RandomScalingFactor(InitalCount))
+        {
+            Label = "My second dataset",
+            BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, ChartColors.Blue)),
+            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            BorderWidth = 1
+        };
+
+        _config4.Data.Labels.AddRange(Months.Take(InitalCount));
+        _config4.Data.Datasets.Add(dataset3);
+    }
+
+    private void RedirectToUseOfEnergySite()
+    {
+        NavManager.NavigateTo("/useofenergy");
+    }
+
+    private void RandomizeData()
+    {
+        foreach (IDataset<int> dataset in _config.Data.Datasets)
+        {
+            int count = dataset.Count;
+            dataset.Clear();
+            dataset.AddRange(RandomScalingFactor(count));
+        }
+
+        _chart.Update();
+    }
+
+    private void AddDataset()
+    {
+        string color = ColorUtil.FromDrawingColor(ChartColors.All[_config.Data.Datasets.Count % ChartColors.All.Count]);
+        IDataset<int> dataset = new LineDataset<int>(RandomScalingFactor(_config.Data.Labels.Count))
+        {
+            Label = $"Dataset {_config.Data.Datasets.Count}",
+            BackgroundColor = color,
+            BorderColor = color,
+            Fill = FillingMode.Disabled
+        };
+
+        _config.Data.Datasets.Add(dataset);
+        _chart.Update();
+    }
+
+    private void RemoveDataset()
+    {
+        IList<IDataset> datasets = _config.Data.Datasets;
+        if (datasets.Count == 0)
+            return;
+
+        datasets.RemoveAt(datasets.Count - 1);
+        _chart.Update();
+    }
+
+    private void AddData()
+    {
+        if (_config.Data.Datasets.Count == 0)
+            return;
+
+        string month = Months[_config.Data.Labels.Count % Months.Count];
+        _config.Data.Labels.Add(month);
+
+        foreach (IDataset<int> dataset in _config.Data.Datasets)
+        {
+            dataset.Add(RandomScalingFactor());
+        }
+
+        _chart.Update();
+    }
+
+    private void RemoveData()
+    {
+        if (_config.Data.Datasets.Count == 0 ||
+            _config.Data.Labels.Count == 0)
+        {
+            return;
+        }
+
+        _config.Data.Labels.RemoveAt(_config.Data.Labels.Count - 1);
+
+        foreach (IDataset<int> dataset in _config.Data.Datasets)
+        {
+            dataset.RemoveAt(dataset.Count - 1);
+        }
+
+        _chart.Update();
+    }
+
+       private void RandomizeDataBar()
+    {
+        foreach (IDataset<int> dataset in _config4.Data.Datasets)
+        {
+            int count = dataset.Count;
+            dataset.Clear();
+            for (int i = 0; i < count; i++)
+            {
+                if (_rng.NextDouble() < 0.2)
+                {
+                    dataset.Add(0);
+                }
+                else
+                {
+                    dataset.Add(RandomScalingFactor());
+                }
+            }
+        }
+
+        _chart4.Update();
+    }
+
+    private void AddDatasetBar()
+    {
+        Color color = ChartColors.All[_config4.Data.Datasets.Count % ChartColors.All.Count];
+        IDataset<int> dataset = new BarDataset<int>(RandomScalingFactor(_config4.Data.Labels.Count))
+        {
+            Label = $"Dataset {_config4.Data.Datasets.Count}",
+            BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, color)),
+            BorderColor = ColorUtil.FromDrawingColor(color),
+            BorderWidth = 1
+        };
+
+        _config4.Data.Datasets.Add(dataset);
+        _chart4.Update();
+    }
+}

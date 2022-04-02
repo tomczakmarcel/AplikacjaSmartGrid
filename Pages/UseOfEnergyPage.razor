@@ -1,0 +1,102 @@
+﻿@page "/useofenergy"
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.BarChart
+@using System.Drawing
+
+<PageTitle>Zaaktualizuj zużycie energii</PageTitle>
+<div class="d-flex justify-content-center"><h1>Zaaktualizuj zużycie energii</h1></div>
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config" @ref="_chart"></Chart>
+    <button>Aktualizuj zużycie</button>
+    </div>
+
+@code {
+        List<UserUsageModel> userUsageModel = ImportCSV.ReturnList();
+        GetDatasetService getDatasetService = new GetDatasetService();
+        private LineConfig _config;
+        private Chart _chart;
+        List<string> ppes = new List<string>();
+        List<string> time = new List<string>();
+
+     protected override void OnInitialized()
+     {
+          _config = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Aktualne zużycie"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Nearest,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Time"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Kw/h"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        ppes = getDatasetService.GetAllClients(userUsageModel);
+        time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);
+        foreach (string client in ppes)
+        {
+            LineDataset<double> dataset = new LineDataset<double>();
+            dataset = getDatasetService.GetDataset(userUsageModel, client);
+                if (dataset.Count == 23519)
+                {
+                    dataset.Label = client;
+                    _config.Options.Scales.YAxes = new List<CartesianAxis>
+                                            {
+                                                    new LinearCartesianAxis
+                                                    {
+                                                        ScaleLabel = new ScaleLabel
+                                                        {
+                                                            LabelString = "Time"
+                                                        },
+                                                        GridLines = new GridLines
+                                                        {
+                                                            Display = false
+                                                        },
+                                                        Ticks = new LinearCartesianTicks
+                                                        {
+                                                            Min = 0,
+                                                            Max = 1
+                                                        }
+                                                    }
+                                                };
+                      _config.Data.Datasets.Add(dataset);
+                }
+        }
+        _config.Data.Labels.AddRange(time);
+    }
+}
