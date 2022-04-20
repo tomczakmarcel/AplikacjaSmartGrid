@@ -101,7 +101,7 @@
                 Title = new OptionsTitle
                 {
                     Display = true,
-                    Text = "Aktualne zużycie"
+                    Text = "Dzienne zużycie"
                 },
                 Tooltips = new Tooltips
                 {
@@ -342,7 +342,7 @@
 
         IDataset<int> dataset1 = new LineDataset<int>(RandomScalingFactor(InitalCount))
         {
-            Label = "My first dataset",
+            Label = "Własna produkcja dzienna",
             BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Red),
             BorderColor = ColorUtil.FromDrawingColor(ChartColors.Red),
             Fill = FillingMode.Disabled
@@ -376,10 +376,10 @@
             }
         }
 
-            LineDataset<double> dataset = new LineDataset<double>();
-            dataset = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray());
-            dataset.Label = "Wszyscy klienci";
-            double maxValue = Math.Round(dataset.Max() / 10.0, 0) * 10;
+            LineDataset<double> actualProduction = new LineDataset<double>();
+            actualProduction = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray());
+            actualProduction.Label = "Wszyscy klienci";
+            double maxValue = Math.Round(actualProduction.Max() / 10.0, 0) * 10;
             _config.Options.Scales.YAxes = new List<CartesianAxis>
                                     {
                                             new LinearCartesianAxis
@@ -400,7 +400,7 @@
                                             }
                                         };
 
-                _config.Data.Datasets.Add(dataset);
+                _config.Data.Datasets.Add(actualProduction);
 
         _config.Data.Labels.AddRange(time);
         var test3 = _config;
