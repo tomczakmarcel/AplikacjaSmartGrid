@@ -72,7 +72,8 @@
         {
             LineDataset<double> dataset = new LineDataset<double>();
             dataset = getDatasetService.GetDataset(userUsageModel, client);
-                if (dataset.Count == 23519)
+            double maxValue = dataset.Max();
+                if (dataset.Count == 244)
                 {
                     dataset.Label = client;
                     _config.Options.Scales.YAxes = new List<CartesianAxis>
@@ -90,7 +91,7 @@
                                                         Ticks = new LinearCartesianTicks
                                                         {
                                                             Min = 0,
-                                                            Max = 1
+                                                            Max = maxValue
                                                         }
                                                     }
                                                 };
