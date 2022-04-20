@@ -4,8 +4,8 @@ namespace AplikacjaSmartGrid.Graphs
 {
     public class GetDatasetService
     {
-        DateTime fromDate = new DateTime(2019, 3, 1, 0, 0, 0);
-        DateTime toDate = new DateTime(2019, 11, 1, 0, 0, 0);
+        DateOnly fromDate = new DateOnly(2019, 3, 1);
+        DateOnly toDate = new DateOnly(2019, 11, 1);
 
         public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client)
         {
@@ -18,6 +18,32 @@ namespace AplikacjaSmartGrid.Graphs
                 if (userUsageObject.PPE == client && userUsageObject.DATACZAS > fromDate && userUsageObject.DATACZAS < toDate)
                 {
                     zuzycie = userUsageObject.ZUZYCIE;
+                    lineDataset.Add(zuzycie);
+                }
+            }
+
+            return lineDataset;
+        }
+
+        public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, string[] clientsToRemove)
+        {
+            string lastPPE = string.Empty;
+            double zuzycie;
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var userUsageModelWithoutCorruptData = userUsageModel.Where(x => !clientsToRemove.Contains(x.PPE)).ToList();
+            var sumAllUsage = userUsageModelWithoutCorruptData
+                .GroupBy(x => x.DATACZAS)
+                .Select(group => new
+                {
+                    DATACZAS = group.Key,
+                    ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
+                });
+
+            foreach (var usage in sumAllUsage)
+            {
+                if (usage.DATACZAS > fromDate && usage.DATACZAS < toDate)
+                {
+                    zuzycie = usage.ZUZYCIE;
                     lineDataset.Add(zuzycie);
                 }
             }
