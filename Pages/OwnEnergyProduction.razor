@@ -1,0 +1,85 @@
+﻿@page "/ownenergyproduction"
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.BarChart
+@using System.Drawing
+
+<PageTitle>Zaaktualizuj produkcje energii</PageTitle>
+<div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config" @ref="_chart"></Chart>
+
+  <div class="container">
+  <div class="row">
+    <div class="col-sm">
+  <div class="form-group">
+     <div class="col-sm">
+    <label for="MaxEnergyProduction">Moc znamionowa kolektorów słonecznych na osiedlu</label>
+    <input type="number" class="form-control" id="MaxEnergyProduction" aria-describedby="maxEnergyProduction" placeholder="Wpisz moc znamionową dla kolektorów słonecznych">
+  </div>
+    </div>
+    <div class="col-sm">
+     <label for="Performance">Sprawność produkcji energii z kolektorów słonecznych</label>
+    <input type="number" class="form-control" id="Performance" aria-describedby="performance" placeholder="Wpisz sprawność produkcji energii">
+    </div>
+    <div class="col-sm">
+     <label for="ApplyCSVForProduction">Załącz plik produkcji energii słonecznej</label>
+    <input type="file" class="form-control" id="ApplyCSVForProduction" aria-describedby="applyCSVForProduction" placeholder="Załącz CSV produkcji energii słonecznej">
+    </div>
+  </div>
+</div>
+    </div>
+    </div>
+
+@code {
+    private LineConfig _config;
+    private Chart _chart;
+
+    protected override void OnInitialized()
+    {
+        _config = new LineConfig
+            {
+                Options = new LineOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = "Aktualne zużycie"
+                    },
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Hover = new Hover
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Scales = new Scales
+                    {
+                        XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Time"
+                            }
+                        }
+                    },
+                        YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Kw/h"
+                            }
+                        }
+                    }
+                    }
+                }
+            };
+    }
+}
