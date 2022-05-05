@@ -15,12 +15,7 @@
     </div>
     <div class="col-sm justify-content-center">
     <Chart Config="_config2" @ref="_chart2"></Chart>
-
-    <button @onclick="RandomizeData">Randomize Data</button>
-    <button @onclick="AddDataset">Add Dataset</button>
-    <button @onclick="RemoveDataset">Remove Dataset</button>
-    <button @onclick="AddData">Add Data</button>
-    <button @onclick="RemoveData">Remove Data</button>
+    <button @onclick="RedirectToEnergyProductionSite">Aktualizuj produkcje energii</button>
     </div>
         <div class="col-sm" justify-content-center>
     <Chart Config="_config3" @ref="_chart3"></Chart>
@@ -78,7 +73,7 @@
     private Chart _chart6;
 
     List<UserUsageModel> userUsageModel = ImportCSV.ReturnList();
-
+    List<SolarWindProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar();
 
 
     protected override void OnInitialized()
@@ -167,7 +162,7 @@
                         {
                             ScaleLabel = new ScaleLabel
                             {
-                                LabelString = "Month"
+                                LabelString = "Dni"
                             }
                         }
                     },
@@ -177,7 +172,7 @@
                         {
                             ScaleLabel = new ScaleLabel
                             {
-                                LabelString = "Value"
+                                LabelString = "KW"
                             }
                         }
                     }
@@ -358,14 +353,22 @@
 
         IDataset<double> datasetUserUsage = new LineDataset<double>()
         {
-            Label = "My second dataset",
+            Label = "Zuzycie energii elektrycznej",
+            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
+            Fill = FillingMode.Disabled
+        };
+
+        IDataset<double> datasetUserSolarProduction = new LineDataset<double>()
+        {
+            Label = "Produkcja energii elektrycznej",
             BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
             BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
             Fill = FillingMode.Disabled
         };
 
         ppes = getDatasetService.GetAllClients(userUsageModel);
-        time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);
+        time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);  
 
         foreach (string client in ppes)
         {
@@ -376,11 +379,11 @@
             }
         }
 
-            LineDataset<double> actualProduction = new LineDataset<double>();
-            actualProduction = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray());
-            actualProduction.Label = "Wszyscy klienci";
-            double maxValue = Math.Round(actualProduction.Max() / 10.0, 0) * 10;
-            _config.Options.Scales.YAxes = new List<CartesianAxis>
+        LineDataset<double> actualProduction = new LineDataset<double>();
+        actualProduction = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray());
+        actualProduction.Label = "Wszyscy klienci";
+        double maxValue = Math.Round(actualProduction.Max() / 10.0, 0) * 10;
+        _config.Options.Scales.YAxes = new List<CartesianAxis>
                                     {
                                             new LinearCartesianAxis
                                             {
@@ -400,12 +403,13 @@
                                             }
                                         };
 
-                _config.Data.Datasets.Add(actualProduction);
-
+        _config.Data.Datasets.Add(actualProduction);
         _config.Data.Labels.AddRange(time);
-        var test3 = _config;
-        _config2.Data.Labels.AddRange(Months.Take(InitalCount));
-        _config2.Data.Datasets.Add(dataset1);
+
+        var solarProduction = getDatasetService.GetAllSolarProductionDataset(solarProductionModel);
+
+        _config2.Data.Labels.AddRange(time);
+        _config2.Data.Datasets.Add(solarProduction);
         _config3.Data.Labels.AddRange(Months.Take(InitalCount));
         _config3.Data.Datasets.Add(dataset2);
         _config5.Data.Labels.AddRange(Months.Take(InitalCount));
@@ -428,6 +432,11 @@
     private void RedirectToUseOfEnergySite()
     {
         NavManager.NavigateTo("/useofenergy");
+    }
+
+    private void RedirectToEnergyProductionSite()
+    {
+        NavManager.NavigateTo("/ownenergyproduction");
     }
 
     private void RandomizeData()

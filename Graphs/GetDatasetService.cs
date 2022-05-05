@@ -51,6 +51,19 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
+        public LineDataset<double> GetAllSolarProductionDataset(List<SolarWindProductionDataModel> solarWindProductionDataModel)
+        {
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = solarWindProductionDataModel.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                  lineDataset.Add(productionDay.SolarProduction);
+            }
+
+            return lineDataset;
+        }
+
         public List<string> GetAxisX(List<UserUsageModel> userUsageModel, string client)
         {
             List<string> time = new List<string>();
