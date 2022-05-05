@@ -51,8 +51,8 @@ namespace AplikacjaSmartGrid.Graphs
 
         public static List<SolarWindProductionDataModel> ReturnListWindSolar()
         {
-            double efficiency = 0.18;
-            double maxPower = 15;
+            double efficiency = 0.30;
+            double maxPower = 10;
             var csvTable = LoadCSV(@"D:\PULPIT\EnergyWindProduction2021\AllDataEnergyWindProd.csv");
             List<SolarWindProductionDataModel> searchParameters = new List<SolarWindProductionDataModel>();
             List<SolarWindProductionDataModel> searchParameters2 = new List<SolarWindProductionDataModel>();
@@ -105,6 +105,47 @@ namespace AplikacjaSmartGrid.Graphs
             foreach (var element in groupedValuesForDay)
             {
                 searchParameters2.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(element.DateOfProduction)), WindProduction = element.WindProduction, SolarProduction = element.SolarProduction});
+            }
+
+            return searchParameters2;
+        }
+
+        public static List<SolarWindProductionDataModel> ReturnListWindSolarDetailed() //tu zajrzec, przyłączyć to do odpowiedniego okna
+        {
+            double efficiency = 0.18;
+            double maxPower = 15;
+            var csvTable = LoadCSV(@"D:\PULPIT\EnergyWindProduction2021\AllDataEnergyWindProd.csv");
+            List<SolarWindProductionDataModel> searchParameters = new List<SolarWindProductionDataModel>();
+            List<SolarWindProductionDataModel> searchParameters2 = new List<SolarWindProductionDataModel>();
+            List<SolarWindProductionDataModel> searchParametersMax = new List<SolarWindProductionDataModel>();
+            List<SolarWindProductionDataModel> searchParametersMaxWithFactors = new List<SolarWindProductionDataModel>();
+
+            for (int i = 0; i < csvTable.Rows.Count; i++)
+            {
+                searchParameters.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(csvTable.Rows[i][0])), SolarProduction = Convert.ToDouble(csvTable.Rows[i][3], CultureInfo.InvariantCulture), WindProduction = Convert.ToDouble(csvTable.Rows[i][2], CultureInfo.InvariantCulture), MaxValueOfSolarProdDay = 0 });
+            }
+
+            var groupedValuesForMax = searchParameters
+                .GroupBy(x => x.DateOfProduction)
+                .Select(group => new
+                {
+                    DateOfProduction = group.Key,
+                    MaxValueOfSolarProdDay = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction).Max()
+                });
+
+            foreach (var element in groupedValuesForMax)
+            {
+                var searchParametersWithMaxValueOfSolarProdDay = searchParameters.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.MaxValueOfSolarProdDay = element.MaxValueOfSolarProdDay; return c; });
+                var searchParametersAsFactor = searchParametersWithMaxValueOfSolarProdDay.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.SolarProduction = c.SolarProduction * efficiency * maxPower / c.MaxValueOfSolarProdDay; return c; });
+                foreach (var element2 in searchParametersAsFactor)
+                {
+                    searchParametersMaxWithFactors.Add(element2); 
+                }
+            }
+
+            foreach (var element in searchParametersMaxWithFactors)
+            {
+                searchParameters2.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(element.DateOfProduction)), WindProduction = element.WindProduction, SolarProduction = element.SolarProduction });
             }
 
             return searchParameters2;
