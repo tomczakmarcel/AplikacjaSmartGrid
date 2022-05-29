@@ -6,11 +6,23 @@ namespace AplikacjaSmartGrid.Graphs
 {
     public class ImportCSV
     {
+
         public ImportCSV()
         {
         }
 
         private static DataTable LoadCSV(string csvPath = @"D:\PULPIT\MTomczak_TEST.csv")
+        {
+            var csvTable = new DataTable();
+            using (var csvReader = new CsvReader(new StreamReader(System.IO.File.OpenRead(csvPath)), true, ';'))
+            {
+                csvTable.Load(csvReader);
+            }
+
+            return csvTable;
+        }
+
+        private static DataTable LoadDataEnergyCSV(string csvPath = @"D:\PULPIT\daneslonecznezprodukcja.csv")
         {
             var csvTable = new DataTable();
             using (var csvReader = new CsvReader(new StreamReader(System.IO.File.OpenRead(csvPath)), true, ';'))
@@ -43,112 +55,65 @@ namespace AplikacjaSmartGrid.Graphs
 
             foreach (var element in test3)
             {
-                searchParameters2.Add(new UserUsageModel { PPE = element.PPE, DATACZAS = element.DATACZAS, ZUZYCIE = element.ZUZYCIE});
+                searchParameters2.Add(new UserUsageModel { PPE = element.PPE, DATACZAS = element.DATACZAS, ZUZYCIE = element.ZUZYCIE });
             }
 
             return searchParameters2;
         }
 
-        public static List<SolarWindProductionDataModel> ReturnListWindSolar()
+        public static List<SolarProductionDataModel> ReturnListWindSolar(bool forADay = false, bool forAHour = false)
         {
-            double efficiency = 0.30;
-            double maxPower = 10;
-            var csvTable = LoadCSV(@"D:\PULPIT\EnergyWindProduction2021\AllDataEnergyWindProd.csv");
-            List<SolarWindProductionDataModel> searchParameters = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParameters2 = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParametersMax = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParametersMaxWithFactors = new List<SolarWindProductionDataModel>();
+            DateTime fromDate = new DateTime(2019, 1, 1);
+            DateTime toDate = new DateTime(2019, 12, 31);
+
+            var csvTable = LoadDataEnergyCSV();
+            List<SolarProductionDataModel> solarHourlyProduction = new List<SolarProductionDataModel>();
+            List<SolarProductionDataModel> solarMinutesProduction = new List<SolarProductionDataModel>();
+            List<SolarProductionDataModel> solarDailyProductionValues = new List<SolarProductionDataModel>();
 
             for (int i = 0; i < csvTable.Rows.Count; i++)
             {
-                searchParameters.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(csvTable.Rows[i][0])), SolarProduction = Convert.ToDouble(csvTable.Rows[i][3], CultureInfo.InvariantCulture), WindProduction = Convert.ToDouble(csvTable.Rows[i][2], CultureInfo.InvariantCulture), MaxValueOfSolarProdDay = 0 });
+                solarHourlyProduction.Add(new SolarProductionDataModel { DateOfProduction = DateTime.Parse(Convert.ToString(csvTable.Rows[i][0])), SolarProduction = Convert.ToDouble(csvTable.Rows[i][1]) * 0.001 });
             }
 
-            var groupedValuesForMax = searchParameters
-                .GroupBy(x => x.DateOfProduction)
-                .Select(group => new
-                {
-                    DateOfProduction = group.Key,
-                    MaxValueOfSolarProdDay = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction).Max()
-                });
+            if (forAHour)
+                return solarHourlyProduction;
 
-            //foreach (var element in groupedValuesForMax)
-            //{
-            //    var searchParametersWithMaxValueOfSolarProdDay = searchParameters.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.MaxValueOfSolarProdDay = element.MaxValueOfSolarProdDay; return c; });
-            //    var searchParametersAsFactor = searchParametersWithMaxValueOfSolarProdDay.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.SolarProduction = c.SolarProduction / c.MaxValueOfSolarProdDay; return c; });
-            //    foreach (var element2 in searchParametersAsFactor)
-            //    {
-            //        searchParametersMaxWithFactors.Add(element2); //Tu dostajemy po prostu faktor
-            //    }
-            //}
-
-            foreach (var element in groupedValuesForMax)
+            foreach (var hour in solarHourlyProduction)
             {
-                var searchParametersWithMaxValueOfSolarProdDay = searchParameters.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.MaxValueOfSolarProdDay = element.MaxValueOfSolarProdDay; return c; });
-                var searchParametersAsFactor = searchParametersWithMaxValueOfSolarProdDay.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.SolarProduction = (c.SolarProduction / c.MaxValueOfSolarProdDay * efficiency * maxPower); return c; });
-                foreach (var element2 in searchParametersAsFactor)
+                DateTime hourProduction = hour.DateOfProduction;
+                double kiloWattsProduction = hour.SolarProduction;
+                double randomDouble = GetRandomDouble(0.9, 1.1);
+
+                for (DateTime date = hourProduction; date <= hourProduction.AddHours(1); date = date.AddMinutes(1))
                 {
-                    searchParametersMaxWithFactors.Add(element2);
+                    solarMinutesProduction.Add(new SolarProductionDataModel { DateOfProduction = date, SolarProduction = kiloWattsProduction / 60 * randomDouble });
                 }
             }
 
-            var groupedValuesForDay = searchParametersMaxWithFactors
-                .GroupBy(x => x.DateOfProduction)
+            if (forADay)
+                return solarMinutesProduction;
+
+            var groupedValuesForDayNew = solarMinutesProduction
+                .GroupBy(x => x.DateOfProduction.Date)
                 .Select(group => new
                 {
                     DateOfProduction = group.Key,
-                    SolarProduction = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction).Sum(),
-                    MaxValueOfSolarProdDay = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction),
-                    WindProduction = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.WindProduction).Sum()
+                    SolarProduction = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction).Sum()
                 });
 
-            foreach (var element in groupedValuesForDay)
+            foreach (var element in groupedValuesForDayNew)
             {
-                searchParameters2.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(element.DateOfProduction)), WindProduction = element.WindProduction, SolarProduction = element.SolarProduction});
+                solarDailyProductionValues.Add(new SolarProductionDataModel { DateOfProduction = element.DateOfProduction, SolarProduction = element.SolarProduction });
             }
 
-            return searchParameters2;
+            return solarDailyProductionValues;
         }
 
-        public static List<SolarWindProductionDataModel> ReturnListWindSolarDetailed() //tu zajrzec, przyłączyć to do odpowiedniego okna
+        static private double GetRandomDouble(double min, double max)
         {
-            double efficiency = 0.18;
-            double maxPower = 15;
-            var csvTable = LoadCSV(@"D:\PULPIT\EnergyWindProduction2021\AllDataEnergyWindProd.csv");
-            List<SolarWindProductionDataModel> searchParameters = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParameters2 = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParametersMax = new List<SolarWindProductionDataModel>();
-            List<SolarWindProductionDataModel> searchParametersMaxWithFactors = new List<SolarWindProductionDataModel>();
-
-            for (int i = 0; i < csvTable.Rows.Count; i++)
-            {
-                searchParameters.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(csvTable.Rows[i][0])), SolarProduction = Convert.ToDouble(csvTable.Rows[i][3], CultureInfo.InvariantCulture), WindProduction = Convert.ToDouble(csvTable.Rows[i][2], CultureInfo.InvariantCulture), MaxValueOfSolarProdDay = 0 });
-            }
-
-            var groupedValuesForMax = searchParameters
-                .GroupBy(x => x.DateOfProduction)
-                .Select(group => new
-                {
-                    DateOfProduction = group.Key,
-                    MaxValueOfSolarProdDay = group.Select(SolarWindProductionDataModel => SolarWindProductionDataModel.SolarProduction).Max()
-                });
-
-            foreach (var element in groupedValuesForMax)
-            {
-                var searchParametersWithMaxValueOfSolarProdDay = searchParameters.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.MaxValueOfSolarProdDay = element.MaxValueOfSolarProdDay; return c; });
-                var searchParametersAsFactor = searchParametersWithMaxValueOfSolarProdDay.Where(c => c.DateOfProduction == element.DateOfProduction).Select(c => { c.SolarProduction = c.SolarProduction * efficiency * maxPower / c.MaxValueOfSolarProdDay; return c; });
-                foreach (var element2 in searchParametersAsFactor)
-                {
-                    searchParametersMaxWithFactors.Add(element2); 
-                }
-            }
-
-            foreach (var element in searchParametersMaxWithFactors)
-            {
-                searchParameters2.Add(new SolarWindProductionDataModel { DateOfProduction = DateOnly.Parse(Convert.ToString(element.DateOfProduction)), WindProduction = element.WindProduction, SolarProduction = element.SolarProduction });
-            }
-
-            return searchParameters2;
+            Random random = new Random();
+            return min + (random.NextDouble() * (max - min));
         }
     }
 }
