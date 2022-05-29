@@ -7,6 +7,9 @@ namespace AplikacjaSmartGrid.Graphs
         DateOnly fromDate = new DateOnly(2019, 3, 1);
         DateOnly toDate = new DateOnly(2019, 11, 1);
 
+        DateTime fromDateTime = new DateTime(2019, 3, 1);
+        DateTime toDateTime = new DateTime(2019, 11, 1);
+
         public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client)
         {
             string lastPPE = string.Empty;
@@ -51,14 +54,14 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
-        public LineDataset<double> GetAllSolarProductionDataset(List<SolarWindProductionDataModel> solarWindProductionDataModel)
+        public LineDataset<double> GetOnlySolarProductionDataset(List<SolarProductionDataModel> solarWindProductionDataModel)
         {
             LineDataset<double> lineDataset = new LineDataset<double>();
             var solarWindProductionDataSet = solarWindProductionDataModel.ToList();
 
             foreach (var productionDay in solarWindProductionDataSet)
             {
-                  lineDataset.Add(productionDay.SolarProduction);
+                lineDataset.Add(productionDay.SolarProduction);
             }
 
             return lineDataset;
@@ -76,6 +79,21 @@ namespace AplikacjaSmartGrid.Graphs
                     {
                         time.Add((userUsageObject.DATACZAS).ToString());
                     }
+                }
+            }
+
+            return time;
+        }
+
+        public List<string> GetAxisXForSolarHourly(List<SolarProductionDataModel> solarProductionDataModel)
+        {
+            List<string> time = new List<string>();
+            string lastPPE = string.Empty;
+            foreach (SolarProductionDataModel solarProductionDataModelObject in solarProductionDataModel)
+            {
+                if (solarProductionDataModelObject.DateOfProduction > fromDateTime && solarProductionDataModelObject.DateOfProduction < toDateTime)
+                {
+                    time.Add(solarProductionDataModelObject.DateOfProduction.ToString());
                 }
             }
 

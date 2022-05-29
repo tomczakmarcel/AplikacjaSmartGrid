@@ -12,15 +12,6 @@
   <div class="row">
     <div class="col-sm">
   <div class="form-group">
-     <div class="col-sm">
-    <label for="MaxEnergyProduction">Moc znamionowa kolektorów słonecznych na osiedlu</label>
-    <input type="number" class="form-control" id="MaxEnergyProduction" aria-describedby="maxEnergyProduction" placeholder="Wpisz moc znamionową dla kolektorów słonecznych">
-  </div>
-    </div>
-    <div class="col-sm">
-     <label for="Performance">Sprawność produkcji energii z kolektorów słonecznych</label>
-    <input type="number" class="form-control" id="Performance" aria-describedby="performance" placeholder="Wpisz sprawność produkcji energii">
-    </div>
     <div class="col-sm">
      <label for="ApplyCSVForProduction">Załącz plik produkcji energii słonecznej</label>
     <input type="file" class="form-control" id="ApplyCSVForProduction" aria-describedby="applyCSVForProduction" placeholder="Załącz CSV produkcji energii słonecznej">
@@ -28,6 +19,7 @@
   </div>
 </div>
     </div>
+        </div>
     </div>
 
 @code {
@@ -36,6 +28,12 @@
 
     protected override void OnInitialized()
     {
+        GetDatasetService getDatasetService = new GetDatasetService();
+        List<SolarProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar(false, true);
+
+        var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);   
+        var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel);
+
         _config = new LineConfig
             {
                 Options = new LineOptions
@@ -81,5 +79,8 @@
                     }
                 }
             };
+
+        _config.Data.Labels.AddRange(time);
+        _config.Data.Datasets.Add(solarProduction);
     }
 }

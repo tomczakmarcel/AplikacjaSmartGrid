@@ -73,7 +73,7 @@
     private Chart _chart6;
 
     List<UserUsageModel> userUsageModel = ImportCSV.ReturnList();
-    List<SolarWindProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar();
+    List<SolarProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar();
 
 
     protected override void OnInitialized()
@@ -406,7 +406,8 @@
         _config.Data.Datasets.Add(actualProduction);
         _config.Data.Labels.AddRange(time);
 
-        var solarProduction = getDatasetService.GetAllSolarProductionDataset(solarProductionModel);
+        //var solarProduction = getDatasetService.GetAllSolarProductionDataset(solarProductionModel);
+        var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);
 
         _config2.Data.Labels.AddRange(time);
         _config2.Data.Datasets.Add(solarProduction);
