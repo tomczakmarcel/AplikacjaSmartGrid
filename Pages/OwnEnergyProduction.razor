@@ -5,6 +5,11 @@
 
 <PageTitle>Zaaktualizuj produkcje energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
+    <div class="col-sm">
+     <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
+    <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
+    </div>
+        <button @onclick=GetValuet>Aktualizuj wykres</button>         <button @onclick=DeleteValuet>Wyczyść wykres</button>
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
 
@@ -26,13 +31,42 @@
     private LineConfig _config;
     private Chart _chart;
 
-    protected override void OnInitialized()
+    private DateTime CurrentValueStart { get; set; }
+    private DateTime CurrentValueEnd { get; set; }
+
+    private DateTime NewValueStart { get; set; }
+    private DateTime NewValueEnd { get; set; }
+
+    private void GetValuet()
+
     {
+        CurrentValueStart = NewValueStart;
+        CurrentValueEnd =  NewValueStart.AddDays(1);
+
         GetDatasetService getDatasetService = new GetDatasetService();
         List<SolarProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar(false, true);
 
-        var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);   
-        var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel);
+        var solarProduction = getDatasetService.GetOnlySolarProductionDayDataset(solarProductionModel, CurrentValueStart, CurrentValueEnd);   
+        var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel, CurrentValueStart, CurrentValueEnd);
+
+        solarProduction.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
+        //if(_config.Data.Labels.Count == 0)
+        if (_config.Data.Labels.Count == 0)
+            _config.Data.Labels.AddRange(time);
+        _config.Data.Datasets.Add(solarProduction);
+    }
+
+    private void DeleteValuet()
+    {
+        _config.Data.Datasets.Clear();
+        _config.Data.Labels.Clear();
+    }  
+
+
+    protected override void OnInitialized()
+    {
+                GetDatasetService getDatasetService = new GetDatasetService();
+        List<SolarProductionDataModel> solarProductionModel = ImportCSV.ReturnListWindSolar(false, true);
 
         _config = new LineConfig
             {
@@ -79,8 +113,5 @@
                     }
                 }
             };
-
-        _config.Data.Labels.AddRange(time);
-        _config.Data.Datasets.Add(solarProduction);
     }
 }
