@@ -7,9 +7,6 @@ namespace AplikacjaSmartGrid.Graphs
         DateOnly fromDate = new DateOnly(2019, 3, 1);
         DateOnly toDate = new DateOnly(2019, 11, 1);
 
-        DateTime fromDateTime = new DateTime(2019, 3, 1);
-        DateTime toDateTime = new DateTime(2019, 11, 1);
-
         public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client)
         {
             string lastPPE = string.Empty;
@@ -67,6 +64,27 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
+        public LineDataset<double> GetOnlySolarProductionDayDataset(List<SolarProductionDataModel> solarWindProductionDataModel, DateTime? fromDateTime, DateTime? toDateTime)
+        {
+            if (fromDateTime == null)
+                fromDateTime = new DateTime(1, 1, 19);
+            if (toDateTime == null)
+                toDateTime = new DateTime(1, 2, 19);            
+
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = solarWindProductionDataModel.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                if (productionDay.DateOfProduction > fromDateTime && productionDay.DateOfProduction < toDateTime)
+                {
+                    lineDataset.Add(productionDay.SolarProduction);
+                }
+            }
+
+            return lineDataset;
+        }
+
         public List<string> GetAxisX(List<UserUsageModel> userUsageModel, string client)
         {
             List<string> time = new List<string>();
@@ -85,15 +103,20 @@ namespace AplikacjaSmartGrid.Graphs
             return time;
         }
 
-        public List<string> GetAxisXForSolarHourly(List<SolarProductionDataModel> solarProductionDataModel)
+        public List<string> GetAxisXForSolarHourly(List<SolarProductionDataModel> solarProductionDataModel, DateTime? fromDateTime, DateTime? toDateTime)
         {
+            if (fromDateTime == null)
+                fromDateTime = new DateTime(1, 1, 19);
+            if (toDateTime == null)
+                toDateTime = new DateTime(1, 2, 19);
+
             List<string> time = new List<string>();
             string lastPPE = string.Empty;
             foreach (SolarProductionDataModel solarProductionDataModelObject in solarProductionDataModel)
             {
                 if (solarProductionDataModelObject.DateOfProduction > fromDateTime && solarProductionDataModelObject.DateOfProduction < toDateTime)
                 {
-                    time.Add(solarProductionDataModelObject.DateOfProduction.ToString());
+                    time.Add(solarProductionDataModelObject.DateOfProduction.Hour.ToString());
                 }
             }
 
