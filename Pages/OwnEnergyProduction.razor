@@ -38,7 +38,6 @@
     private DateTime NewValueEnd { get; set; }
 
     private void GetValuet()
-
     {
         CurrentValueStart = NewValueStart;
         CurrentValueEnd =  NewValueStart.AddDays(1);
@@ -50,7 +49,7 @@
         var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel, CurrentValueStart, CurrentValueEnd);
 
         solarProduction.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
-        //if(_config.Data.Labels.Count == 0)
+
         if (_config.Data.Labels.Count == 0)
             _config.Data.Labels.AddRange(time);
         _config.Data.Datasets.Add(solarProduction);

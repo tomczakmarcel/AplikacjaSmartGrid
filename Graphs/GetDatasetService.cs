@@ -4,18 +4,24 @@ namespace AplikacjaSmartGrid.Graphs
 {
     public class GetDatasetService
     {
-        DateOnly fromDate = new DateOnly(2019, 3, 1);
-        DateOnly toDate = new DateOnly(2019, 11, 1);
+        DateTime fromDate = new DateTime(2019, 3, 1);
+        DateTime toDate = new DateTime(2019, 11, 1);
 
-        public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client)
+        public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
+            if (fromDateMethod == null & toDateMethod == null)
+            {
+                fromDateMethod = fromDate;
+                toDateMethod = toDate;
+            }
+
             string lastPPE = string.Empty;
             double zuzycie;
             LineDataset<double> lineDataset = new LineDataset<double>();
 
             foreach (UserUsageModel userUsageObject in userUsageModel)
             {
-                if (userUsageObject.PPE == client && userUsageObject.DATACZAS > fromDate && userUsageObject.DATACZAS < toDate)
+                if (userUsageObject.PPE == client && userUsageObject.DATACZAS > fromDateMethod && userUsageObject.DATACZAS < toDateMethod)
                 {
                     zuzycie = userUsageObject.ZUZYCIE;
                     lineDataset.Add(zuzycie);
@@ -25,8 +31,14 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
-        public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, string[] clientsToRemove)
+        public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, string[] clientsToRemove, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
+            if (fromDateMethod == null & toDateMethod == null)
+            {
+                fromDateMethod = fromDate;
+                toDateMethod = toDate;
+            }
+
             string lastPPE = string.Empty;
             double zuzycie;
             LineDataset<double> lineDataset = new LineDataset<double>();
@@ -41,7 +53,7 @@ namespace AplikacjaSmartGrid.Graphs
 
             foreach (var usage in sumAllUsage)
             {
-                if (usage.DATACZAS > fromDate && usage.DATACZAS < toDate)
+                if (usage.DATACZAS > fromDateMethod && usage.DATACZAS < toDateMethod)
                 {
                     zuzycie = usage.ZUZYCIE;
                     lineDataset.Add(zuzycie);
@@ -85,15 +97,21 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
-        public List<string> GetAxisX(List<UserUsageModel> userUsageModel, string client)
+        public List<string> GetAxisX(List<UserUsageModel> userUsageModel, string client, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
+            if (fromDateMethod == null & toDateMethod == null)
+            {
+                fromDateMethod = fromDate;
+                toDateMethod = toDate;
+            }
+
             List<string> time = new List<string>();
             string lastPPE = string.Empty;
             foreach (UserUsageModel userUsageObject in userUsageModel)
             {
                 if(userUsageObject.PPE == client)
                 { 
-                    if (userUsageObject.DATACZAS > fromDate && userUsageObject.DATACZAS < toDate)
+                    if (userUsageObject.DATACZAS > fromDateMethod && userUsageObject.DATACZAS < toDateMethod)
                     {
                         time.Add((userUsageObject.DATACZAS).ToString());
                     }

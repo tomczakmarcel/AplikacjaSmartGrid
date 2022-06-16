@@ -41,7 +41,7 @@ namespace AplikacjaSmartGrid.Graphs
 
             for (int i = 0; i < csvTable.Rows.Count; i++)
             {
-                searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = DateOnly.Parse(csvTable.Rows[i][11].ToString().Substring(0, csvTable.Rows[i][11].ToString().IndexOf(' '))), ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
+                searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = DateTime.Parse(csvTable.Rows[i][11].ToString().Substring(0, csvTable.Rows[i][11].ToString().IndexOf(' '))), ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
             }
 
             var test3 = searchParameters
@@ -49,7 +49,7 @@ namespace AplikacjaSmartGrid.Graphs
                 .Select(group => new
                 {
                     PPE = group.Key.PPE,
-                    DATACZAS = group.Key.DATACZAS,
+                    DATACZAS = group.Key.DATACZAS.Date,
                     ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
                 });
 
@@ -59,6 +59,20 @@ namespace AplikacjaSmartGrid.Graphs
             }
 
             return searchParameters2;
+        }
+
+        public static List<UserUsageModel> ReturnListDetailed()
+        {
+            var csvTable = LoadCSV();
+            List<UserUsageModel> searchParameters = new List<UserUsageModel>();
+            List<UserUsageModel> searchParameters2 = new List<UserUsageModel>();
+
+            for (int i = 0; i < csvTable.Rows.Count; i++)
+            {
+                searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = DateTime.Parse(csvTable.Rows[i][11].ToString()), ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
+            }
+
+            return searchParameters;
         }
 
         public static List<SolarProductionDataModel> ReturnListWindSolar(bool forADay = false, bool forAHour = false)
