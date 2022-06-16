@@ -5,18 +5,133 @@
 
 <PageTitle>Zaaktualizuj zużycie energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Zaaktualizuj zużycie energii</h1></div>
+    <div class="col-sm">
+     <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
+    <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
+    <button @onclick=GetValuet>Aktualizuj wykres</button>
+    <button @onclick=GetValueSum>Aktualizuj z sumowanymi wartościami</button>
+    </div>
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
-    <button>Aktualizuj zużycie</button>
     </div>
 
 @code {
-        List<UserUsageModel> userUsageModel = ImportCSV.ReturnList();
-        GetDatasetService getDatasetService = new GetDatasetService();
-        private LineConfig _config;
-        private Chart _chart;
-        List<string> ppes = new List<string>();
-        List<string> time = new List<string>();
+    private DateTime CurrentValueStart { get; set; }
+    private DateTime CurrentValueEnd { get; set; }
+
+    private DateTime NewValueStart { get; set; }
+    private DateTime NewValueEnd { get; set; }
+
+    List<UserUsageModel> userUsageModel = ImportCSV.ReturnListDetailed();
+    GetDatasetService getDatasetService = new GetDatasetService();
+    private LineConfig _config;
+    private Chart _chart;
+    List<string> ppes = new List<string>();
+    List<string> time = new List<string>();
+    double maxValue = 1;
+    double maxValue2 = 0;
+
+    private void GetValuet()
+    {
+        maxValue = 1;
+        CurrentValueStart = NewValueStart;
+        CurrentValueEnd =  NewValueStart.AddDays(1);
+
+        _config.Data.Datasets.Clear();
+        _config.Data.Labels.Clear();
+
+        ppes = getDatasetService.GetAllClients(userUsageModel);
+        time = getDatasetService.GetAxisX(userUsageModel, ppes[0], CurrentValueStart, CurrentValueEnd);
+        foreach (string client in ppes)
+        {
+            LineDataset<double> dataset = new LineDataset<double>();
+            dataset = getDatasetService.GetDataset(userUsageModel, client, CurrentValueStart, CurrentValueEnd);
+            if (dataset.Count > 1)
+            {
+                if (maxValue > maxValue2)
+                {
+                    maxValue = dataset.Max() + 0.5;
+                }
+                dataset.Label = client;
+                _config.Options.Scales.YAxes = new List<CartesianAxis>
+                                            {
+                                                    new LinearCartesianAxis
+                                                    {
+                                                        ScaleLabel = new ScaleLabel
+                                                        {
+                                                            LabelString = "Time"
+                                                        },
+                                                        GridLines = new GridLines
+                                                        {
+                                                            Display = false
+                                                        },
+                                                        Ticks = new LinearCartesianTicks
+                                                        {
+                                                            Min = 0,
+                                                            Max = maxValue
+                                                        }
+                                                    }
+                                                };
+                _config.Data.Datasets.Add(dataset);
+                maxValue2 = maxValue;
+            }
+        }
+        _config.Data.Labels.AddRange(time);
+    }
+
+     private void GetValueSum()
+    {
+                maxValue = 1;
+        CurrentValueStart = NewValueStart;
+        CurrentValueEnd =  NewValueStart.AddDays(1);
+
+        _config.Data.Datasets.Clear();
+        _config.Data.Labels.Clear();
+
+        List<String> datasets = new List<String>();
+
+        foreach (string client in ppes)
+        {
+            var datasetToCount = getDatasetService.GetDataset(userUsageModel, client);
+            if (datasetToCount.Count < 244)
+            {
+                datasets.Add(client);
+            }
+        }
+
+        ppes = getDatasetService.GetAllClients(userUsageModel);
+        time = getDatasetService.GetAxisX(userUsageModel, ppes[0], CurrentValueStart, CurrentValueEnd);
+            LineDataset<double> dataset = new LineDataset<double>();
+            dataset = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray(), CurrentValueStart, CurrentValueEnd);
+            if (dataset.Count > 1)
+            {
+
+                maxValue = Math.Round(dataset.Max());
+                dataset.Label = "Wszyscy klienci";
+                _config.Options.Scales.YAxes = new List<CartesianAxis>
+                                            {
+                                                    new LinearCartesianAxis
+                                                    {
+                                                        ScaleLabel = new ScaleLabel
+                                                        {
+                                                            LabelString = "Time"
+                                                        },
+                                                        GridLines = new GridLines
+                                                        {
+                                                            Display = false
+                                                        },
+                                                        Ticks = new LinearCartesianTicks
+                                                        {
+                                                            Min = 0,
+                                                            Max = maxValue
+                                                        }
+                                                    }
+                                                };
+                _config.Data.Datasets.Add(dataset);
+                maxValue2 = maxValue;
+        }
+        _config.Data.Labels.AddRange(time);
+    }
 
      protected override void OnInitialized()
      {
@@ -58,46 +173,12 @@
                         {
                             ScaleLabel = new ScaleLabel
                             {
-                                LabelString = "Kw/h"
+                                LabelString = "kW/h"
                             }
                         }
                     }
                 }
             }
         };
-
-        ppes = getDatasetService.GetAllClients(userUsageModel);
-        time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);
-        foreach (string client in ppes)
-        {
-            LineDataset<double> dataset = new LineDataset<double>();
-            dataset = getDatasetService.GetDataset(userUsageModel, client);
-            double maxValue = dataset.Max();
-                if (dataset.Count == 244)
-                {
-                    dataset.Label = client;
-                    _config.Options.Scales.YAxes = new List<CartesianAxis>
-                                            {
-                                                    new LinearCartesianAxis
-                                                    {
-                                                        ScaleLabel = new ScaleLabel
-                                                        {
-                                                            LabelString = "Time"
-                                                        },
-                                                        GridLines = new GridLines
-                                                        {
-                                                            Display = false
-                                                        },
-                                                        Ticks = new LinearCartesianTicks
-                                                        {
-                                                            Min = 0,
-                                                            Max = maxValue
-                                                        }
-                                                    }
-                                                };
-                      _config.Data.Datasets.Add(dataset);
-                }
-        }
-        _config.Data.Labels.AddRange(time);
     }
 }

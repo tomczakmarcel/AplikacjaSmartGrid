@@ -81,6 +81,7 @@
         Dictionary<string, double[]> test = new Dictionary<string, double[]>();
         List<String> ppes = new List<String>();
         List<string> time = new List<string>();
+        List<string> timeTrimmed = new List<string>();
         List<double> usageOf1Key = new List<double>();
         List<String> osx = new List<String>();
         List<String> datasets = new List<String>();
@@ -404,12 +405,20 @@
                                         };
 
         _config.Data.Datasets.Add(actualProduction);
-        _config.Data.Labels.AddRange(time);
+        foreach (string testo in time)
+        {
+            int indexOf = testo.IndexOf(' ');
+            string newString = string.Empty;
+            newString = testo.Substring(0, indexOf);
+            timeTrimmed.Add(newString);
+        }
+
+        _config.Data.Labels.AddRange(timeTrimmed);
 
         //var solarProduction = getDatasetService.GetAllSolarProductionDataset(solarProductionModel);
         var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);
 
-        _config2.Data.Labels.AddRange(time);
+        _config2.Data.Labels.AddRange(timeTrimmed);
         _config2.Data.Datasets.Add(solarProduction);
         _config3.Data.Labels.AddRange(Months.Take(InitalCount));
         _config3.Data.Datasets.Add(dataset2);
