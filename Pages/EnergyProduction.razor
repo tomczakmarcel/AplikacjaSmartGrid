@@ -1,9 +1,9 @@
-﻿@page "/ownenergyproduction"
+﻿@page "/energyproduction"
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using System.Drawing
 
-<PageTitle>Zaaktualizuj produkcje energii</PageTitle>
+<PageTitle>Zaaktualizuj produkcje zewnętrzną energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
@@ -43,16 +43,16 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
+        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
 
-        var solarProduction = getDatasetService.GetOnlySolarProductionDayDataset(solarProductionModel, CurrentValueStart, CurrentValueEnd);   
-        var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel, CurrentValueStart, CurrentValueEnd);
+        var windProduction = getDatasetService.GetOnlyWindProductionDayDataset(windProductionModel, CurrentValueStart, CurrentValueEnd);   
+        var time = getDatasetService.GetAxisXForWindHourly(windProductionModel, CurrentValueStart, CurrentValueEnd);
 
-        solarProduction.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
+        windProduction.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
 
         if (_config.Data.Labels.Count == 0)
             _config.Data.Labels.AddRange(time);
-        _config.Data.Datasets.Add(solarProduction);
+        _config.Data.Datasets.Add(windProduction);
     }
 
     private void DeleteValuet()
@@ -65,7 +65,7 @@
     protected override void OnInitialized()
     {
                 GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
+        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
 
         _config = new LineConfig
             {
