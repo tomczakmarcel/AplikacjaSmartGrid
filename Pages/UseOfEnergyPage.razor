@@ -22,7 +22,7 @@
     private DateTime NewValueStart { get; set; }
     private DateTime NewValueEnd { get; set; }
 
-    List<UserUsageModel> userUsageModel = ImportCSV.ReturnListDetailed();
+    List<UserUsageModel> userUsageModel = ImportCSVService.ReturnListDetailed();
     GetDatasetService getDatasetService = new GetDatasetService();
     private LineConfig _config;
     private Chart _chart;
