@@ -1,6 +1,7 @@
 ﻿using ChartJs.Blazor.LineChart;
+using AplikacjaSmartGrid.Graphs.Model;
 
-namespace AplikacjaSmartGrid.Graphs
+namespace AplikacjaSmartGrid.Graphs.Services
 {
     public class GetDatasetService
     {
@@ -76,6 +77,19 @@ namespace AplikacjaSmartGrid.Graphs
             return lineDataset;
         }
 
+        public LineDataset<double> GetOnlyWindProductionDataset(List<WindProductionDataModel> solarWindProductionDataModel)
+        {
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = solarWindProductionDataModel.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                lineDataset.Add(productionDay.WindProduction);
+            }
+
+            return lineDataset;
+        }
+
         public LineDataset<double> GetOnlySolarProductionDayDataset(List<SolarProductionDataModel> solarWindProductionDataModel, DateTime? fromDateTime, DateTime? toDateTime)
         {
             if (fromDateTime == null)
@@ -91,6 +105,27 @@ namespace AplikacjaSmartGrid.Graphs
                 if (productionDay.DateOfProduction > fromDateTime && productionDay.DateOfProduction < toDateTime)
                 {
                     lineDataset.Add(productionDay.SolarProduction);
+                }
+            }
+
+            return lineDataset;
+        }
+
+        public LineDataset<double> GetOnlyWindProductionDayDataset(List<WindProductionDataModel> solarWindProductionDataModel, DateTime? fromDateTime, DateTime? toDateTime)
+        {
+            if (fromDateTime == null)
+                fromDateTime = new DateTime(1, 1, 19);
+            if (toDateTime == null)
+                toDateTime = new DateTime(1, 2, 19);
+
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = solarWindProductionDataModel.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                if (productionDay.DateOfProduction > fromDateTime && productionDay.DateOfProduction < toDateTime)
+                {
+                    lineDataset.Add(productionDay.WindProduction);
                 }
             }
 
@@ -131,6 +166,26 @@ namespace AplikacjaSmartGrid.Graphs
             List<string> time = new List<string>();
             string lastPPE = string.Empty;
             foreach (SolarProductionDataModel solarProductionDataModelObject in solarProductionDataModel)
+            {
+                if (solarProductionDataModelObject.DateOfProduction > fromDateTime && solarProductionDataModelObject.DateOfProduction < toDateTime)
+                {
+                    time.Add(solarProductionDataModelObject.DateOfProduction.Hour.ToString());
+                }
+            }
+
+            return time;
+        }
+
+        public List<string> GetAxisXForWindHourly(List<WindProductionDataModel> solarProductionDataModel, DateTime? fromDateTime, DateTime? toDateTime)
+        {
+            if (fromDateTime == null)
+                fromDateTime = new DateTime(1, 1, 19);
+            if (toDateTime == null)
+                toDateTime = new DateTime(1, 2, 19);
+
+            List<string> time = new List<string>();
+            string lastPPE = string.Empty;
+            foreach (WindProductionDataModel solarProductionDataModelObject in solarProductionDataModel)
             {
                 if (solarProductionDataModelObject.DateOfProduction > fromDateTime && solarProductionDataModelObject.DateOfProduction < toDateTime)
                 {

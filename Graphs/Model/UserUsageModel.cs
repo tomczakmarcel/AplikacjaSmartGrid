@@ -1,4 +1,4 @@
-﻿namespace AplikacjaSmartGrid.Graphs
+﻿namespace AplikacjaSmartGrid.Graphs.Model
 {
     public class UserUsageModel
     {
