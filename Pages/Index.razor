@@ -26,30 +26,17 @@
 <div class="row">
     <div class="col-sm justify-content-center">
     <Chart Config="_config4" @ref="_chart4"></Chart>
-
-    <button @onclick="RandomizeData">Randomize Data</button>
-    <button @onclick="AddDataset">Add Dataset</button>
-    <button @onclick="RemoveDataset">Remove Dataset</button>
-    <button @onclick="AddData">Add Data</button>
-    <button @onclick="RemoveData">Remove Data</button>
+    <button @onclick="RedirectToEnergyBalance">Sprawdź balans energii</button>
     </div>
         <div class="col-sm justify-content-center">
     <Chart Config="_config5" @ref="_chart5"></Chart>
 
     <button @onclick="RandomizeData">Randomize Data</button>
-    <button @onclick="AddDataset">Add Dataset</button>
-    <button @onclick="RemoveDataset">Remove Dataset</button>
-    <button @onclick="AddData">Add Data</button>
-    <button @onclick="RemoveData">Remove Data</button>
     </div>
         <div class="col-sm" justify-content-center>
     <Chart Config="_config6" @ref="_chart6"></Chart>
 
     <button @onclick="RandomizeData">Randomize Data</button>
-    <button @onclick="AddDataset">Add Dataset</button>
-    <button @onclick="RemoveDataset">Remove Dataset</button>
-    <button @onclick="AddData">Add Data</button>
-    <button @onclick="RemoveData">Remove Data</button>
     </div>
 </div>
 
@@ -68,9 +55,11 @@
     private LineConfig _config6;
     private Chart _chart6;
 
-    List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList();
+    List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList(false, true);
+    List<UserUsageModel> userUsageModel2 = ImportCSVService.ReturnList(false, false);
     List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(true);
     List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(true);
+    List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
 
 
     protected override void OnInitialized()
@@ -83,6 +72,7 @@
         List<String> osx = new List<String>();
         List<String> datasets = new List<String>();
         GetDatasetService getDatasetService = new GetDatasetService();
+        CalculateEnergyBalanceService calculateEnergyBalanceService = new CalculateEnergyBalanceService();
         DateOnly fromDate = new DateOnly(2019, 3, 1);
         DateOnly toDate = new DateOnly(2019, 11, 1);
 
@@ -371,14 +361,14 @@
         foreach (string client in ppes)
         {
             var datasetToCount = getDatasetService.GetDataset(userUsageModel, client);
-            if (datasetToCount.Count != 244)
+            if (datasetToCount.Count < 20448)
             {
                 datasets.Add(client);
             }
         }
 
         LineDataset<double> actualProduction = new LineDataset<double>();
-        actualProduction = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray());
+        actualProduction = getDatasetService.GetAllDataset(userUsageModel);
         actualProduction.Label = "Wszyscy klienci";
         double maxValue = Math.Round(actualProduction.Max() / 10.0, 0) * 10;
         _config.Options.Scales.YAxes = new List<CartesianAxis>
@@ -433,8 +423,10 @@
             BorderWidth = 1
         };
 
-        _config4.Data.Labels.AddRange(Months.Take(InitalCount));
-        _config4.Data.Datasets.Add(dataset3);
+        energyBalanceModel = calculateEnergyBalanceService.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
+        var energyBalanceDataset = getDatasetService.GetEnergyBalance(energyBalanceModel);
+        _config4.Data.Labels.AddRange(timeTrimmed);
+        _config4.Data.Datasets.Add(energyBalanceDataset);
     }
 
     private void RedirectToUseOfEnergySite()
@@ -450,6 +442,11 @@
     private void RedirectToWindAndOthersEnergyProductionSite()
     {
         NavManager.NavigateTo("/energyproduction");
+    }    
+    
+    private void RedirectToEnergyBalance()
+    {
+        NavManager.NavigateTo("/energybalance");
     }
 
     private void RandomizeData()
