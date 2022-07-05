@@ -102,7 +102,7 @@
         ppes = getDatasetService.GetAllClients(userUsageModel);
         time = getDatasetService.GetAxisX(userUsageModel, ppes[0], CurrentValueStart, CurrentValueEnd);
             LineDataset<double> dataset = new LineDataset<double>();
-            dataset = getDatasetService.GetAllDataset(userUsageModel, datasets.ToArray(), CurrentValueStart, CurrentValueEnd);
+            dataset = getDatasetService.GetAllDataset(userUsageModel, CurrentValueStart, CurrentValueEnd);
             if (dataset.Count > 1)
             {
 

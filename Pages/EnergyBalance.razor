@@ -1,0 +1,119 @@
+﻿@page "/energybalance"
+
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.BarChart
+@using System.Drawing
+
+<PageTitle>Balans energii</PageTitle>
+<div class="d-flex justify-content-center"><h1>Sprawdź balans energii w poszczególnych dniach</h1></div>
+    <div class="col-sm">
+     <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
+    <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
+    </div>
+        <button @onclick=GetValuet>Aktualizuj wykres</button>         <button @onclick=DeleteValuet>Wyczyść wykres</button>
+    <div class="col-sm justify-content-center">
+    <Chart Config="_config" @ref="_chart"></Chart>
+
+  <div class="container">
+  <div class="row">
+    <div class="col-sm">
+  <div class="form-group">
+    <div class="col-sm">
+     <label for="ApplyCSVForProduction">Załącz plik produkcji energii słonecznej</label>
+    <input type="file" class="form-control" id="ApplyCSVForProduction" aria-describedby="applyCSVForProduction" placeholder="Załącz CSV produkcji energii słonecznej">
+    </div>
+  </div>
+</div>
+    </div>
+        </div>
+    </div>
+
+@code {
+    private LineConfig _config;
+    private Chart _chart;
+
+    private DateTime CurrentValueStart { get; set; }
+    private DateTime CurrentValueEnd { get; set; }
+
+    private DateTime NewValueStart { get; set; }
+    private DateTime NewValueEnd { get; set; }
+
+    private void GetValuet()
+    {
+        CurrentValueStart = NewValueStart;
+        CurrentValueEnd =  NewValueStart.AddDays(1);
+
+        GetDatasetService getDatasetService = new GetDatasetService();
+        List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList();
+        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
+        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
+        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
+
+        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
+
+        var energyBalanceDataset = getDatasetService.GetEnergyBalanceMinutes(energyBalance, CurrentValueStart, CurrentValueEnd);
+        var time = getDatasetService.GetAxisXMinutes(userUsageModel, CurrentValueStart, CurrentValueEnd);
+
+        energyBalanceDataset.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
+
+        if (_config.Data.Labels.Count == 0)
+            _config.Data.Labels.AddRange(time);
+        _config.Data.Datasets.Add(energyBalanceDataset);
+    }
+
+    private void DeleteValuet()
+    {
+        _config.Data.Datasets.Clear();
+        _config.Data.Labels.Clear();
+    }  
+
+
+    protected override void OnInitialized()
+    {
+        _config = new LineConfig
+            {
+                Options = new LineOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = "Aktualne zużycie"
+                    },
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Hover = new Hover
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Scales = new Scales
+                    {
+                        XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Time"
+                            }
+                        }
+                    },
+                        YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Kw/h"
+                            }
+                        }
+                    }
+                    }
+                }
+            };
+    }
+}

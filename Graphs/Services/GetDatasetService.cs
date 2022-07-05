@@ -5,7 +5,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
 {
     public class GetDatasetService
     {
-        DateTime fromDate = new DateTime(2019, 3, 1);
+        DateTime fromDate = new DateTime(2019, 4, 1);
         DateTime toDate = new DateTime(2019, 11, 1);
 
         public LineDataset<double> GetDataset(List<UserUsageModel> userUsageModel, string client, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
@@ -32,7 +32,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return lineDataset;
         }
 
-        public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, string[] clientsToRemove, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
+        public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
             if (fromDateMethod == null & toDateMethod == null)
             {
@@ -43,16 +43,16 @@ namespace AplikacjaSmartGrid.Graphs.Services
             string lastPPE = string.Empty;
             double zuzycie;
             LineDataset<double> lineDataset = new LineDataset<double>();
-            var userUsageModelWithoutCorruptData = userUsageModel.Where(x => !clientsToRemove.Contains(x.PPE)).ToList();
-            var sumAllUsage = userUsageModelWithoutCorruptData
-                .GroupBy(x => x.DATACZAS)
-                .Select(group => new
-                {
-                    DATACZAS = group.Key,
-                    ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
-                });
+            //var userUsageModelWithoutCorruptData = userUsageModel.Where(x => !clientsToRemove.Contains(x.PPE)).ToList();
+            //var sumAllUsage = userUsageModelWithoutCorruptData
+            //    .GroupBy(x => x.DATACZAS)
+            //    .Select(group => new
+            //    {
+            //        DATACZAS = group.Key,
+            //        ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
+            //    });
 
-            foreach (var usage in sumAllUsage)
+            foreach (var usage in userUsageModel)
             {
                 if (usage.DATACZAS > fromDateMethod && usage.DATACZAS < toDateMethod)
                 {
@@ -132,6 +132,41 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return lineDataset;
         }
 
+        public LineDataset<double> GetEnergyBalance(List<EnergyBalanceModel> energyBalance)
+        {
+
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = energyBalance.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                lineDataset.Add(productionDay.EnergyBalance);
+            }
+
+            return lineDataset;
+        }
+
+        public LineDataset<double> GetEnergyBalanceMinutes(List<EnergyBalanceModel> energyBalance, DateTime? fromDateTime, DateTime? toDateTime)
+        {
+            if (fromDateTime == null)
+                fromDateTime = new DateTime(1, 1, 19);
+            if (toDateTime == null)
+                toDateTime = new DateTime(1, 2, 19);
+
+            LineDataset<double> lineDataset = new LineDataset<double>();
+            var solarWindProductionDataSet = energyBalance.ToList();
+
+            foreach (var productionDay in solarWindProductionDataSet)
+            {
+                if (productionDay.DateOfProduction > fromDateTime && productionDay.DateOfProduction < toDateTime)
+                {
+                    lineDataset.Add(productionDay.EnergyBalance);
+                }
+            }
+
+            return lineDataset;
+        }
+
         public List<string> GetAxisX(List<UserUsageModel> userUsageModel, string client, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
             if (fromDateMethod == null & toDateMethod == null)
@@ -151,6 +186,28 @@ namespace AplikacjaSmartGrid.Graphs.Services
                         time.Add((userUsageObject.DATACZAS).ToString());
                     }
                 }
+            }
+
+            return time;
+        }
+
+        public List<string> GetAxisXMinutes(List<UserUsageModel> userUsageModel, DateTime? fromDateMethod = null, DateTime? toDateMethod = null, string client = "590322428400018442")
+        {
+            if (fromDateMethod == null & toDateMethod == null)
+            {
+                fromDateMethod = fromDate;
+                toDateMethod = toDate;
+            }
+
+            List<string> time = new List<string>();
+            string lastPPE = string.Empty;
+            foreach (UserUsageModel userUsageObject in userUsageModel)
+            {
+                    if (userUsageObject.DATACZAS > fromDateMethod && userUsageObject.DATACZAS < toDateMethod)
+                    {
+                        time.Add((userUsageObject.DATACZAS).ToString());
+                    }
+
             }
 
             return time;
