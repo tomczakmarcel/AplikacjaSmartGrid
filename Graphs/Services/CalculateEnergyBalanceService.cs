@@ -29,5 +29,22 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
             return energyBalanceModel;
         }
+
+        public List<EnergyBalanceModel> CalculateEnergyAfterBattery(List<EnergyBalanceModel> energyBalanceBeforeBattery, List<EVEnergyBalanceModel> EVList)
+        {
+            List<EnergyBalanceModel> energyBalanceModelAfterEV = new List<EnergyBalanceModel>();
+
+            //var test = EVEnergyBalanceService.GetValuesBeforeUsage(energyBalanceBeforeBattery, EVList);
+
+            //if (energyBalanceBeforeBattery.Count == test.Count)
+            //{
+            //    for (int i = 0; i < energyBalanceBeforeBattery.Count; i++)
+            //    { 
+                
+            //    }
+            //}
+
+            return energyBalanceModelAfterEV;
+        }
     }
 }

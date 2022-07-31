@@ -427,6 +427,8 @@
         var energyBalanceDataset = getDatasetService.GetEnergyBalance(energyBalanceModel);
         _config4.Data.Labels.AddRange(timeTrimmed);
         _config4.Data.Datasets.Add(energyBalanceDataset);
+
+        test2();
     }
 
     private void RedirectToUseOfEnergySite()
@@ -443,7 +445,7 @@
     {
         NavManager.NavigateTo("/energyproduction");
     }    
-    
+
     private void RedirectToEnergyBalance()
     {
         NavManager.NavigateTo("/energybalance");
@@ -460,6 +462,58 @@
 
         _chart.Update();
     }
+
+    public void test2()
+    {
+        GetDatasetService getDatasetService = new GetDatasetService();
+        List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList(true, false);
+        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
+        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, false);
+        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, false);
+
+        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
+
+        List<EVEnergyBalanceModel> listEVBalance = new List<EVEnergyBalanceModel>();
+        EVEnergyBalanceModel car1 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car2 = new EVEnergyBalanceModel();
+        Dictionary<DayOfWeek, TimeOnly> carGetOut = new Dictionary<DayOfWeek, TimeOnly>();
+        TimeOnly mondayFridayTimeOut = new TimeOnly(7, 0);
+        carGetOut.Add(DayOfWeek.Monday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Tuesday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Wednesday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Thursday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Friday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Saturday, mondayFridayTimeOut);
+        carGetOut.Add(DayOfWeek.Sunday, mondayFridayTimeOut);
+
+        Dictionary<DayOfWeek, TimeOnly> carGetIn = new Dictionary<DayOfWeek, TimeOnly>();
+        TimeOnly mondayFridayTimeIn = new TimeOnly(16, 0);
+        carGetIn.Add(DayOfWeek.Monday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Tuesday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Wednesday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Thursday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Friday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Saturday, mondayFridayTimeIn);
+        carGetIn.Add(DayOfWeek.Sunday, mondayFridayTimeIn);
+        car1.Id = 0;
+        car1.MaxEnergy = 70;
+        car1.StoredEnergy = 70;
+        car1.PercentageEnergy = 1;
+        car1.CarOutOfGridTime = carGetOut;
+        car1.CarComeBackToGridTime = carGetIn;
+        car2.Id = 1;
+        car2.MaxEnergy = 60;
+        car2.StoredEnergy = 60;
+        car2.PercentageEnergy = 1;
+        car2.CarOutOfGridTime = carGetOut;
+        car2.CarComeBackToGridTime = carGetIn;
+        listEVBalance.Add(car1);
+        listEVBalance.Add(car2);
+
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService();
+        EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
+    }
+    
 
     private void AddDataset()
     {

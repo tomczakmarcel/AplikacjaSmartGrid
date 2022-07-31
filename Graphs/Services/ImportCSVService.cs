@@ -86,7 +86,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
                     }
                 }
 
-                return searchParametersHourAllUsers;
+                return searchParametersMinutesGrouped;
             }
 
             if (allUsers && !sortByMinute)
@@ -208,7 +208,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
         public static List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false)
         {
             double maxProduction = 5917.243;
-            double installedPower = 5;
+            double installedPower = 20;
             DateTime fromDate = new DateTime(2019, 4, 1);
             DateTime toDate = new DateTime(2019, 11, 1);
 
