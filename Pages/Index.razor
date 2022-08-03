@@ -510,8 +510,10 @@
         listEVBalance.Add(car1);
         listEVBalance.Add(car2);
 
-        EVEnergyBalanceService EVservice = new EVEnergyBalanceService();
-        EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(listEVBalance, energyBalance);
+        var test = EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
+        EVEnergyBalanceService EVservice2 = new EVEnergyBalanceService(test, energyBalance);
+        EVservice2.GetEVEnergyBalance();
     }
     
 
