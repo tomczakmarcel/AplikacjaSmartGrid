@@ -8,6 +8,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
         private List<EVEnergyBalanceModel> EVList;
         private List<EnergyBalanceModel> EnergyBalanceList;
         private double usageOfKWh = 2;
+        private double howMuchEnergyCanBeLoadedAt1Minute = 0.116;
+        private double howMuchEnergyCanBeDeloadedAt1Minute = 0.04;
 
         public EVEnergyBalanceService(List<EVEnergyBalanceModel> EV, List<EnergyBalanceModel> EnergyBalance)
         {
@@ -68,18 +70,28 @@ namespace AplikacjaSmartGrid.Graphs.Services
             List<int> carsToRemoveFromThisMinute = new List<int>();
             int numberOfCars = listOfEVAtAMinute.Count;
             double amountOfEnergy = Math.Abs(energyBalance / numberOfCars);
+            bool continueCalculation = true;
+
+            if (amountOfEnergy > 0.116)
+            {
+                do
+                {
+                    amountOfEnergy = amountOfEnergy / 2;
+                } while (amountOfEnergy > 0.116);
+            }
 
             do
             {
                 for (int p = 0; p < listOfEVAtAMinute.Count; p++)
                 {
-                    if (listOfEVAtAMinute[p].StoredEnergy < (listOfEVAtAMinute[p].MaxEnergy - amountOfEnergy) && energyBalance > 0)
+                    if (listOfEVAtAMinute[p].StoredEnergy < (listOfEVAtAMinute[p].MaxEnergy - amountOfEnergy) && energyBalance > 0 && listOfEVAtAMinute[p].LoadedEnergyForAMinute <= 0.116)
                     {
                         energyBalance -= amountOfEnergy;
                         listOfEVAtAMinute[p].StoredEnergy += amountOfEnergy;
+                        listOfEVAtAMinute[p].LoadedEnergyForAMinute += amountOfEnergy;
                     }
 
-                    if (listOfEVAtAMinute[p].StoredEnergy >= listOfEVAtAMinute[p].MaxEnergy)
+                    if (listOfEVAtAMinute[p].StoredEnergy >= (listOfEVAtAMinute[p].MaxEnergy - amountOfEnergy) || Math.Round(listOfEVAtAMinute[p].LoadedEnergyForAMinute, 3) >= 0.116 || energyBalance <= 0)
                     {
                         EVList.Add(listOfEVAtAMinute[p]);
                         carsToRemoveFromThisMinute.Add(listOfEVAtAMinute[p].Id);
@@ -96,8 +108,10 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 }
 
                 carsToRemoveFromThisMinute.Clear();
+                if (listOfEVAtAMinute.Count <= 0)
+                    continueCalculation = false;
 
-            } while (energyBalance <= 0 && listOfEVAtAMinute.Count <= 0);
+            } while (continueCalculation);
 
             EnergyBalanceList[i].EnergyBalance = energyBalance;
         }
@@ -107,18 +121,27 @@ namespace AplikacjaSmartGrid.Graphs.Services
             List<int> carsToRemoveFromThisMinute = new List<int>();
             int numberOfCars = listOfEVAtAMinute.Count;
             double amountOfEnergy = Math.Abs(energyBalance / numberOfCars);
+            if (amountOfEnergy > 0.04)
+            {
+                do
+                {
+                    amountOfEnergy = amountOfEnergy / 2;
+                } while (amountOfEnergy > 0.04);
+            }
+            bool continueCalculation = true;
 
             do
             {
                 for (int p = 0; p < listOfEVAtAMinute.Count; p++)
                 {
-                    if (listOfEVAtAMinute[p].StoredEnergy > (listOfEVAtAMinute[p].MaxEnergy / 2) && energyBalance < 0)
+                    if (listOfEVAtAMinute[p].StoredEnergy > (listOfEVAtAMinute[p].MaxEnergy / 2) && energyBalance < 0 && listOfEVAtAMinute[p].LoadedEnergyForAMinute > -0.04)
                     {
                         energyBalance += amountOfEnergy;
                         listOfEVAtAMinute[p].StoredEnergy -= amountOfEnergy;
+                        listOfEVAtAMinute[p].LoadedEnergyForAMinute -= amountOfEnergy;
                     }
 
-                    if (listOfEVAtAMinute[p].StoredEnergy <= (listOfEVAtAMinute[p].MaxEnergy / 2))
+                    if (listOfEVAtAMinute[p].StoredEnergy <= (listOfEVAtAMinute[p].MaxEnergy / 2) || Math.Round(listOfEVAtAMinute[p].LoadedEnergyForAMinute, 2) <= -0.04 || energyBalance >= 0)
                     {
                         EVList.Add(listOfEVAtAMinute[p]);
                         carsToRemoveFromThisMinute.Add(listOfEVAtAMinute[p].Id);
@@ -135,13 +158,15 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 }
 
                 carsToRemoveFromThisMinute.Clear();
+                if (listOfEVAtAMinute.Count <= 0)
+                    continueCalculation = false;
 
-            } while (energyBalance <= 0 && listOfEVAtAMinute.Count <= 0);
+            } while (continueCalculation);
 
             EnergyBalanceList[i].EnergyBalance = energyBalance;
         }
 
-        public List<EVEnergyBalanceModel> GetEVEnergyBalance()
+        public List<EnergyBalanceModel> GetEVEnergyBalance()
         {
             double energyBalance = 0;
             double usageOfKWh = 2;
@@ -176,7 +201,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 }
             }
 
-            return EVList;
+            return EnergyBalanceList;
         }
 
         public List<EVEnergyBalanceModel> GetValuesBeforeUsage(List<EnergyBalanceModel> energyBalanceBeforeBattery, List<EVEnergyBalanceModel> listWithNoValues)
@@ -199,7 +224,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
                         CarOutOfGridTime = car.First().CarOutOfGridTime,
                         Id = car.First().Id,
                         MaxEnergy = car.First().MaxEnergy,
-                        PercentageEnergy = car.First().PercentageEnergy,
+                        LoadedEnergyForAMinute = 0,
                         StoredEnergy = car.First().StoredEnergy,
                         TimeStamp = DateTimeFromEnergyBalanceList[i]
                     });

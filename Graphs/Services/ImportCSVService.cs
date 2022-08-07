@@ -26,7 +26,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
         public static List<UserUsageModel> ReturnList(bool sortByMinute = false, bool allUsers = false)
         {
             DateTime fromDate = new DateTime(2019, 4, 1);
-            DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 11, 1);
+            DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV();
             List<UserUsageModel> searchParameters = new List<UserUsageModel>();
@@ -158,7 +159,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
         public static List<SolarProductionDataModel> ReturnListSolar(bool forADay = false, bool forAHour = false)
         {
             DateTime fromDate = new DateTime(2019, 4, 1);
-            DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 11, 1);
+            DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV(@"D:\PULPIT\daneslonecznezprodukcja.csv");
             List<SolarProductionDataModel> solarHourlyProduction = new List<SolarProductionDataModel>();
@@ -210,7 +212,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
             double maxProduction = 5917.243;
             double installedPower = 20;
             DateTime fromDate = new DateTime(2019, 4, 1);
-            DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 11, 1);
+            DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV(@"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv");
             List<WindProductionDataModel> windProduction = new List<WindProductionDataModel>();
