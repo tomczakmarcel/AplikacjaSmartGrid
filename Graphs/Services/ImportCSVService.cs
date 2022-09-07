@@ -7,6 +7,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
 {
     public class ImportCSVService
     {
+        DateTime fromDate = new DateTime(2019, 4, 1);
+        DateTime toDate = new DateTime(2019, 11, 1);
 
         public ImportCSVService()
         {
@@ -15,7 +17,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
         private static DataTable LoadCSV(string csvPath = @"D:\PULPIT\MTomczak_TEST.csv")
         {
             var csvTable = new DataTable();
-            using (var csvReader = new CsvReader(new StreamReader(System.IO.File.OpenRead(csvPath)), true, ';'))
+            using (var csvReader = new CsvReader(new StreamReader(File.OpenRead(csvPath)), true, ';'))
             {
                 csvTable.Load(csvReader);
             }
@@ -23,11 +25,11 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return csvTable;
         }
 
-        public static List<UserUsageModel> ReturnList(bool sortByMinute = false, bool allUsers = false)
+        public List<UserUsageModel> ReturnList(bool sortByMinute = false, bool allUsers = false)
         {
-            DateTime fromDate = new DateTime(2019, 4, 1);
-            //DateTime toDate = new DateTime(2019, 11, 1);
-            DateTime toDate = new DateTime(2019, 4, 15);
+            //DateTime fromDate = new DateTime(2019, 4, 1);
+            ////DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV();
             List<UserUsageModel> searchParameters = new List<UserUsageModel>();
@@ -44,7 +46,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 string format2 = "M-d-yyyy HH:mm";
                 DateTime czas2 = DateTime.ParseExact(newDateTime2, format2, CultureInfo.InvariantCulture);
 
-                if (czas2 < toDate && czas2 >= fromDate)
+                if (czas2 <= toDate && czas2 >= fromDate)
                 {
                     DateTime test = Convert.ToDateTime("31.03.2019 03:00:00");
                     string dateTime = csvTable.Rows[i][1].ToString() + " " + csvTable.Rows[i][2].ToString();
@@ -61,12 +63,12 @@ namespace AplikacjaSmartGrid.Graphs.Services
                     {
                         searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = czas, ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
                     }
-                }            
+                }
             }
 
             if (sortByMinute == true)
             {
-                var searchParametersGrouped= searchParameters
+                var searchParametersGrouped = searchParameters
                     .GroupBy(x => (x.DATACZAS))
                     .Select(group => new
                     {
@@ -82,7 +84,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
                     for (DateTime date = hourProduction; date < hourProduction.AddMinutes(15); date = date.AddMinutes(1))
                     {
-                        double randomDouble = GetRandomDouble(0.9, 1.1);
+                        double randomDouble = GetRandomDouble(1, 1);
                         searchParametersMinutesGrouped.Add(new UserUsageModel { DATACZAS = date, ZUZYCIE = kiloWattsProduction / 15 * randomDouble });
                     }
                 }
@@ -143,24 +145,36 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return searchParametersHourAllUsers;
         }
 
-        public static List<UserUsageModel> ReturnListDetailed()
+        public List<UserUsageModel> ReturnListDetailed()
         {
             var csvTable = LoadCSV();
             List<UserUsageModel> searchParameters = new List<UserUsageModel>();
-
             for (int i = 0; i < csvTable.Rows.Count; i++)
             {
-                searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = DateTime.Parse(csvTable.Rows[i][11].ToString()), ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
+                string dateTime = csvTable.Rows[i][1].ToString() + " " + csvTable.Rows[i][2].ToString();
+                string newDateTime = dateTime.Replace('.', '-');
+                string format = "M-d-yyyy HH:mm";
+                CultureInfo provider = CultureInfo.InvariantCulture;
+                DateTime czas = DateTime.ParseExact(newDateTime, format, CultureInfo.InvariantCulture);
+                if (czas.Minute == 59)
+                {
+                    czas = czas.AddMinutes(1);
+                }
+
+                if (czas <= toDate && czas >= fromDate)
+                {
+                    searchParameters.Add(new UserUsageModel { PPE = csvTable.Rows[i][0].ToString(), DATACZAS = czas, ZUZYCIE = Convert.ToDouble(csvTable.Rows[i][4]) });
+                }
             }
 
             return searchParameters;
         }
 
-        public static List<SolarProductionDataModel> ReturnListSolar(bool forADay = false, bool forAHour = false)
+        public List<SolarProductionDataModel> ReturnListSolar(bool forADay = false, bool forAHour = false)
         {
-            DateTime fromDate = new DateTime(2019, 4, 1);
-            //DateTime toDate = new DateTime(2019, 11, 1);
-            DateTime toDate = new DateTime(2019, 4, 15);
+            //DateTime fromDate = new DateTime(2019, 4, 1);
+            ////DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV(@"D:\PULPIT\daneslonecznezprodukcja.csv");
             List<SolarProductionDataModel> solarHourlyProduction = new List<SolarProductionDataModel>();
@@ -196,24 +210,24 @@ namespace AplikacjaSmartGrid.Graphs.Services
             {
                 DateTime hourProduction = hour.DateOfProduction;
                 double kiloWattsProduction = hour.SolarProduction;
-                double randomDouble = GetRandomDouble(0.9, 1.1);
+                double randomDouble = GetRandomDouble(1, 1);
 
                 for (DateTime date = hourProduction; date < hourProduction.AddHours(1); date = date.AddMinutes(1))
                 {
-                     solarMinutesProduction.Add(new SolarProductionDataModel { DateOfProduction = date, SolarProduction = kiloWattsProduction / 60 * randomDouble });
+                    solarMinutesProduction.Add(new SolarProductionDataModel { DateOfProduction = date, SolarProduction = kiloWattsProduction / 60 * randomDouble });
                 }
             }
 
-                return solarMinutesProduction;
+            return solarMinutesProduction;
         }
 
-        public static List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false)
+        public List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false)
         {
             double maxProduction = 5917.243;
             double installedPower = 20;
-            DateTime fromDate = new DateTime(2019, 4, 1);
-            //DateTime toDate = new DateTime(2019, 11, 1);
-            DateTime toDate = new DateTime(2019, 4, 15);
+            //DateTime fromDate = new DateTime(2019, 4, 1);
+            ////DateTime toDate = new DateTime(2019, 11, 1);
+            //DateTime toDate = new DateTime(2019, 4, 15);
 
             var csvTable = LoadCSV(@"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv");
             List<WindProductionDataModel> windProduction = new List<WindProductionDataModel>();
@@ -225,7 +239,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
             {
                 double hour = Convert.ToDouble(csvTable.Rows[i][1]) - 1;
                 if (DateTime.Parse(Convert.ToString(csvTable.Rows[i][0] + " " + Convert.ToString(hour + ":00"))) < toDate && DateTime.Parse(Convert.ToString(csvTable.Rows[i][0] + " " + Convert.ToString(hour + ":00"))) >= fromDate)
-                    windProduction.Add(new WindProductionDataModel { DateOfProduction = DateTime.Parse(Convert.ToString(csvTable.Rows[i][0] + " " + Convert.ToString(hour + ":00"))), WindProduction = Convert.ToDouble(csvTable.Rows[i][2]) / maxProduction * installedPower});
+                    windProduction.Add(new WindProductionDataModel { DateOfProduction = DateTime.Parse(Convert.ToString(csvTable.Rows[i][0] + " " + Convert.ToString(hour + ":00"))), WindProduction = Convert.ToDouble(csvTable.Rows[i][2]) / maxProduction * installedPower });
             }
 
             if (forAHour)
@@ -252,7 +266,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
             {
                 DateTime hourProduction = hour.DateOfProduction;
                 double kiloWattsProduction = hour.WindProduction;
-                double randomDouble = GetRandomDouble(0.9, 1.1);
+                double randomDouble = GetRandomDouble(1.0, 1.0);
 
                 for (DateTime date = hourProduction; date < hourProduction.AddHours(1); date = date.AddMinutes(1))
                 {
@@ -262,7 +276,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
             return windMinutesProduction;
         }
-            static private double GetRandomDouble(double min, double max)
+        private double GetRandomDouble(double min, double max)
         {
             Random random = new Random();
             return min + (random.NextDouble() * (max - min));

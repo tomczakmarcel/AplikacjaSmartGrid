@@ -32,6 +32,9 @@
     private LineConfig _config;
     private Chart _chart;
 
+    ImportCSVService importCSVService = new ImportCSVService();
+
+
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
 
@@ -44,10 +47,10 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList();
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList();
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
-        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 

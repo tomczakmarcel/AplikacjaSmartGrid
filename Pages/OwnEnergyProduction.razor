@@ -34,6 +34,8 @@
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
 
+            ImportCSVService importCSVService = new ImportCSVService();
+
     private DateTime NewValueStart { get; set; }
     private DateTime NewValueEnd { get; set; }
 
@@ -43,7 +45,7 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
 
         var solarProduction = getDatasetService.GetOnlySolarProductionDayDataset(solarProductionModel, CurrentValueStart, CurrentValueEnd);   
         var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel, CurrentValueStart, CurrentValueEnd);
@@ -65,7 +67,7 @@
     protected override void OnInitialized()
     {
                 GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
 
         _config = new LineConfig
             {

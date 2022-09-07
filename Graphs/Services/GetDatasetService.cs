@@ -34,31 +34,34 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
         public LineDataset<double> GetAllDataset(List<UserUsageModel> userUsageModel, DateTime? fromDateMethod = null, DateTime? toDateMethod = null)
         {
-            if (fromDateMethod == null & toDateMethod == null)
-            {
-                fromDateMethod = fromDate;
-                toDateMethod = toDate;
-            }
-
             string lastPPE = string.Empty;
             double zuzycie;
             LineDataset<double> lineDataset = new LineDataset<double>();
-            //var userUsageModelWithoutCorruptData = userUsageModel.Where(x => !clientsToRemove.Contains(x.PPE)).ToList();
-            //var sumAllUsage = userUsageModelWithoutCorruptData
-            //    .GroupBy(x => x.DATACZAS)
-            //    .Select(group => new
-            //    {
-            //        DATACZAS = group.Key,
-            //        ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
-            //    });
+
+            if (fromDateMethod != null)
+            {
+                var userUsageModelCombined = userUsageModel.GroupBy(x => (x.DATACZAS))
+                .Select(group => new
+                {
+                    DATACZAS = group.Key,
+                    ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
+                });
+
+                foreach (var usage in userUsageModelCombined)
+                {
+                    if (fromDateMethod <= usage.DATACZAS && toDateMethod >= usage.DATACZAS)
+                    {
+                        zuzycie = usage.ZUZYCIE;
+                        lineDataset.Add(zuzycie);
+                    }
+                }
+                return lineDataset;
+            }
 
             foreach (var usage in userUsageModel)
             {
-                if (usage.DATACZAS > fromDateMethod && usage.DATACZAS < toDateMethod)
-                {
-                    zuzycie = usage.ZUZYCIE;
-                    lineDataset.Add(zuzycie);
-                }
+                zuzycie = usage.ZUZYCIE;
+                lineDataset.Add(zuzycie);
             }
 
             return lineDataset;
@@ -132,11 +135,29 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return lineDataset;
         }
 
-        public LineDataset<double> GetEnergyBalance(List<EnergyBalanceModel> energyBalance)
+        public LineDataset<double> GetEnergyBalance(List<EnergyBalanceModel> energyBalance, bool forADay = false)
         {
 
             LineDataset<double> lineDataset = new LineDataset<double>();
             var solarWindProductionDataSet = energyBalance.ToList();
+
+            if (forADay)
+            {
+                var searchParametersd = solarWindProductionDataSet
+                     .GroupBy(x => (x.DateOfProduction.Date))
+                     .Select(group => new
+                     {
+                         DateOfProduction = group.Key,
+                         EnergyBalance = group.Select(EnergyBalanceModel => EnergyBalanceModel.EnergyBalance).Sum()
+                     });
+
+                foreach (var productionDay in searchParametersd)
+                {
+                    lineDataset.Add(productionDay.EnergyBalance);
+                }
+
+                return lineDataset;
+            }
 
             foreach (var productionDay in solarWindProductionDataSet)
             {
@@ -181,7 +202,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
             {
                 if(userUsageObject.PPE == client)
                 { 
-                    if (userUsageObject.DATACZAS > fromDateMethod && userUsageObject.DATACZAS < toDateMethod)
+                    if (userUsageObject.DATACZAS >= fromDateMethod && userUsageObject.DATACZAS < toDateMethod)
                     {
                         time.Add((userUsageObject.DATACZAS).ToString());
                     }

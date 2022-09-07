@@ -2,6 +2,7 @@
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using AplikacjaSmartGrid.Graphs.Model;
+@using AplikacjaSmartGrid.Graphs.Services;
 @using System.Drawing
 @inject NavigationManager NavManager
 
@@ -53,14 +54,16 @@
     private LineConfig _config5;
     private Chart _chart5;
 
-    List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList(false, true);
-    List<UserUsageModel> userUsageModel2 = ImportCSVService.ReturnList(false, false);
-    List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(true);
-    List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(true);
-    List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
+    ImportCSVService importCSVService = new ImportCSVService();
 
     protected override void OnInitialized()
     {
+
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true);
+        List<UserUsageModel> userUsageModel2 = importCSVService.ReturnList(false, false);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true);
+        List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
         List<String> ppes = new List<String>();
         List<string> time = new List<string>();
         List<string> timeTrimmed = new List<string>();
@@ -75,7 +78,7 @@
 
         _config4 = LineConfigPreparation("Bilans Końcowy Energii bez aut elektrycznych", "Dni", "kW/h");
 
-        _config5 = LineConfigPreparation("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h");
+        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h");
 
 
         IDataset<int> dataset1 = new LineDataset<int>(RandomScalingFactor(InitalCount))
@@ -121,10 +124,10 @@
             timeTrimmed.Add(newString);
         }
 
-        LineDataset<double> actualProduction = new LineDataset<double>();
-        actualProduction = getDatasetService.GetAllDataset(userUsageModel);
-        actualProduction.Label = "Wszyscy klienci";
-        _config.Data.Datasets.Add(actualProduction);
+        LineDataset<double> actualUserUsage = new LineDataset<double>();
+        actualUserUsage = getDatasetService.GetAllDataset(userUsageModel);
+        actualUserUsage.Label = "Wszyscy klienci";
+        _config.Data.Datasets.Add(actualUserUsage);
         _config.Data.Labels.AddRange(timeTrimmed);
 
         var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);
@@ -141,7 +144,9 @@
         _config4.Data.Datasets.Add(energyBalanceDataset);
 
         var listOfEnergyBalanceAfterEVs = test2();
-        var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs);
+        var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs, true);
+
+        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h", Convert.ToInt32(energyBalanceDataset.Max()), Convert.ToInt32(energyBalanceDataset.Min()));
         _config5.Data.Labels.AddRange(timeTrimmed);
         _config5.Data.Datasets.Add(energyBalanceAfterEVDataset);
     }
@@ -181,16 +186,22 @@
     public List<EnergyBalanceModel> test2()
     {
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = ImportCSVService.ReturnList(true, false);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(true, false);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = ImportCSVService.ReturnListSolar(false, false);
-        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, false);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, false);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, false);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 
         List<EVEnergyBalanceModel> listEVBalance = new List<EVEnergyBalanceModel>();
         EVEnergyBalanceModel car1 = new EVEnergyBalanceModel();
         EVEnergyBalanceModel car2 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car3 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car4 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car5 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car6 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car7 = new EVEnergyBalanceModel();
+        EVEnergyBalanceModel car8 = new EVEnergyBalanceModel();
         Dictionary<DayOfWeek, TimeOnly> carGetOut = new Dictionary<DayOfWeek, TimeOnly>();
         TimeOnly mondayFridayTimeOut = new TimeOnly(7, 0);
         carGetOut.Add(DayOfWeek.Monday, mondayFridayTimeOut);
@@ -210,29 +221,108 @@
         carGetIn.Add(DayOfWeek.Friday, mondayFridayTimeIn);
         carGetIn.Add(DayOfWeek.Saturday, mondayFridayTimeIn);
         carGetIn.Add(DayOfWeek.Sunday, mondayFridayTimeIn);
+
+        Dictionary<DayOfWeek, TimeOnly> carGetOut2 = new Dictionary<DayOfWeek, TimeOnly>();
+        TimeOnly mondayFridayTimeOut2 = new TimeOnly(1, 59);
+        carGetOut2.Add(DayOfWeek.Monday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Tuesday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Wednesday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Thursday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Friday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Saturday, mondayFridayTimeOut);
+        carGetOut2.Add(DayOfWeek.Sunday, mondayFridayTimeOut);
+
+        Dictionary<DayOfWeek, TimeOnly> carGetIn2 = new Dictionary<DayOfWeek, TimeOnly>();
+        TimeOnly mondayFridayTimeIn2 = new TimeOnly(2, 0);
+        carGetIn2.Add(DayOfWeek.Monday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Tuesday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Wednesday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Thursday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Friday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Saturday, mondayFridayTimeIn);
+        carGetIn2.Add(DayOfWeek.Sunday, mondayFridayTimeIn);
+
         car1.Id = 0;
         car1.MaxEnergy = 70;
-        car1.StoredEnergy = 70;
+        car1.StoredEnergy = new List<double>();
+        car1.StoredEnergy.Add(35.0);
         car1.LoadedEnergyForAMinute = 0;
         car1.CarOutOfGridTime = carGetOut;
         car1.CarComeBackToGridTime = carGetIn;
+
         car2.Id = 1;
         car2.MaxEnergy = 60;
-        car2.StoredEnergy = 60;
+        car2.StoredEnergy = new List<double>();
+        car2.StoredEnergy.Add(35.0);
         car2.LoadedEnergyForAMinute = 0;
         car2.CarOutOfGridTime = carGetOut;
         car2.CarComeBackToGridTime = carGetIn;
+
+        car3.Id = 2;
+        car3.MaxEnergy = 70;
+        car3.StoredEnergy = new List<double>();
+        car3.StoredEnergy.Add(40.0);
+        car3.LoadedEnergyForAMinute = 0;
+        car3.CarOutOfGridTime = carGetOut2;
+        car3.CarComeBackToGridTime = carGetIn2;
+
+        car4.Id = 3;
+        car4.MaxEnergy = 70;
+        car4.StoredEnergy = new List<double>();
+        car4.StoredEnergy.Add(35.0);
+        car4.LoadedEnergyForAMinute = 0;
+        car4.CarOutOfGridTime = carGetOut2;
+        car4.CarComeBackToGridTime = carGetIn2;
+
+        car5.Id = 4;
+        car5.MaxEnergy = 70;
+        car5.StoredEnergy = new List<double>();
+        car5.StoredEnergy.Add(60.0);
+        car5.LoadedEnergyForAMinute = 0;
+        car5.CarOutOfGridTime = carGetOut2;
+        car5.CarComeBackToGridTime = carGetIn2;
+
+        car6.Id = 5;
+        car6.MaxEnergy = 70;
+        car6.StoredEnergy = new List<double>();
+        car6.StoredEnergy.Add(35.0);
+        car6.LoadedEnergyForAMinute = 0;
+        car6.CarOutOfGridTime = carGetOut2;
+        car6.CarComeBackToGridTime = carGetIn2;
+
+        car7.Id = 6;
+        car7.MaxEnergy = 700;
+        car7.StoredEnergy = new List<double>();
+        car7.StoredEnergy.Add(350.0);
+        car7.LoadedEnergyForAMinute = 0;
+        car7.CarOutOfGridTime = carGetOut2;
+        car7.CarComeBackToGridTime = carGetIn2;
+
+        car8.Id = 7;
+        car8.MaxEnergy = 700;
+        car8.StoredEnergy = new List<double>();
+        car8.StoredEnergy.Add(350.0);
+        car8.LoadedEnergyForAMinute = 0;
+        car8.CarOutOfGridTime = carGetOut2;
+        car8.CarComeBackToGridTime = carGetIn2;
+
         listEVBalance.Add(car1);
         listEVBalance.Add(car2);
+        listEVBalance.Add(car3);
+        listEVBalance.Add(car4);
+        listEVBalance.Add(car5);
+        listEVBalance.Add(car6);
+        listEVBalance.Add(car7);
+        listEVBalance.Add(car8);
 
         EVEnergyBalanceService EVservice = new EVEnergyBalanceService(listEVBalance, energyBalance);
-        var test = EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
-        EVEnergyBalanceService EVservice2 = new EVEnergyBalanceService(test, energyBalance);
-        var listOfEnergyBalanceAfterEVs = EVservice2.GetEVEnergyBalance();
+        //var test = EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
+        //EVEnergyBalanceService EVservice2 = new EVEnergyBalanceService(test, energyBalance);
+        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
 
         return listOfEnergyBalanceAfterEVs;
     }
-    
+
 
     private void AddDataset()
     {
@@ -293,7 +383,7 @@
         _chart.Update();
     }
 
-       private void RandomizeDataBar()
+    private void RandomizeDataBar()
     {
         foreach (IDataset<int> dataset in _config4.Data.Datasets)
         {
@@ -375,6 +465,65 @@
                                 LabelString = $"{yAxisName}"
                             }
                         }
+                    }
+                }
+            }
+        };
+        return newConfig;
+    }
+
+    private LineConfig LineConfigPreparationEnergyBalance(string titleOfGraph, string xAxisName, string yAxisName, int suggestedMaxYAxisValue = 150, int suggestedMinYAxisValue = -150)
+    {
+        var newConfig = new LineConfig
+            {
+                Options = new LineOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = $"{titleOfGraph}"
+                    },
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Hover = new Hover
+                    {
+                        Mode = InteractionMode.Nearest,
+                        Intersect = true
+                    },
+                    Scales = new Scales
+                    {
+                        XAxes = new List<CartesianAxis>
+                        {
+                            new CategoryAxis
+                            {
+                                ScaleLabel = new ScaleLabel
+                                {
+                                    Display = true,
+                                    LabelString = $"{xAxisName}"
+                                }
+                            }
+                        },
+                        YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            Ticks = new LinearCartesianTicks
+                            {
+                                SuggestedMax = suggestedMaxYAxisValue,
+                                SuggestedMin = suggestedMinYAxisValue
+                            },
+                            ScaleLabel = new ScaleLabel
+                            {
+                                Display = true,
+                                LabelString = $"{yAxisName}",
+
+                            }
+                        }
+
                     }
                 }
             }
