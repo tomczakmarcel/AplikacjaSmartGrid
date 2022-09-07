@@ -31,6 +31,8 @@
     private LineConfig _config;
     private Chart _chart;
 
+    ImportCSVService importCSVService = new ImportCSVService();
+
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
 
@@ -43,7 +45,7 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
 
         var windProduction = getDatasetService.GetOnlyWindProductionDayDataset(windProductionModel, CurrentValueStart, CurrentValueEnd);   
         var time = getDatasetService.GetAxisXForWindHourly(windProductionModel, CurrentValueStart, CurrentValueEnd);
@@ -64,8 +66,8 @@
 
     protected override void OnInitialized()
     {
-                GetDatasetService getDatasetService = new GetDatasetService();
-        List<WindProductionDataModel> windProductionModel = ImportCSVService.ReturnListWind(false, true);
+        GetDatasetService getDatasetService = new GetDatasetService();
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
 
         _config = new LineConfig
             {
