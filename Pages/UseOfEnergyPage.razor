@@ -18,11 +18,11 @@
 @code {
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
-
+    public List<UserUsageModel> userUsageModel = new List<UserUsageModel>();
     private DateTime NewValueStart { get; set; }
     private DateTime NewValueEnd { get; set; }
 
-    List<UserUsageModel> userUsageModel = ImportCSVService.ReturnListDetailed();
+    ImportCSVService importCSVService = new ImportCSVService();
     GetDatasetService getDatasetService = new GetDatasetService();
     private LineConfig _config;
     private Chart _chart;
@@ -81,7 +81,7 @@
 
      private void GetValueSum()
     {
-                maxValue = 1;
+        maxValue = 1;
         CurrentValueStart = NewValueStart;
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
@@ -93,10 +93,7 @@
         foreach (string client in ppes)
         {
             var datasetToCount = getDatasetService.GetDataset(userUsageModel, client);
-            if (datasetToCount.Count < 244)
-            {
-                datasets.Add(client);
-            }
+            datasets.Add(client);
         }
 
         ppes = getDatasetService.GetAllClients(userUsageModel);
@@ -135,6 +132,7 @@
 
      protected override void OnInitialized()
      {
+           userUsageModel = importCSVService.ReturnListDetailed();
           _config = new LineConfig
         {
             Options = new LineOptions
