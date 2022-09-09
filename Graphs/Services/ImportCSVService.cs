@@ -14,7 +14,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
         {
         }
 
-        private static DataTable LoadCSV(string csvPath = @"D:\PULPIT\MTomczak_TEST.csv")
+        private static DataTable LoadCSV(string csvPath)
         {
             var csvTable = new DataTable();
             using (var csvReader = new CsvReader(new StreamReader(File.OpenRead(csvPath)), true, ';'))
@@ -25,18 +25,13 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return csvTable;
         }
 
-        public List<UserUsageModel> ReturnList(bool sortByMinute = false, bool allUsers = false)
+        public List<UserUsageModel> ReturnList(bool sortByMinute = false, bool allUsers = false, string csvPath = @"D:\PULPIT\MTomczak_TEST.csv")
         {
-            //DateTime fromDate = new DateTime(2019, 4, 1);
-            ////DateTime toDate = new DateTime(2019, 11, 1);
-            //DateTime toDate = new DateTime(2019, 4, 15);
-
-            var csvTable = LoadCSV();
+            var csvTable = LoadCSV(csvPath);
             List<UserUsageModel> searchParameters = new List<UserUsageModel>();
-            List<UserUsageModel> searchParameters4 = new List<UserUsageModel>();
+            List<UserUsageModel> searchParametersAllUsersGroupedDateTime = new List<UserUsageModel>();
             List<UserUsageModel> searchParametersHourAllUsers = new List<UserUsageModel>();
             List<UserUsageModel> searchParametersHours = new List<UserUsageModel>();
-            List<UserUsageModel> searchParametersMinutes = new List<UserUsageModel>();
             List<UserUsageModel> searchParametersMinutesGrouped = new List<UserUsageModel>();
 
             for (int i = 0; i < csvTable.Rows.Count; i++)
@@ -94,7 +89,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
             if (allUsers && !sortByMinute)
             {
-                var test3 = searchParameters
+                var grouppedByDateTime = searchParameters
                 .GroupBy(x => (x.DATACZAS.Date))
                 .Select(group => new
                 {
@@ -102,15 +97,15 @@ namespace AplikacjaSmartGrid.Graphs.Services
                     ZUZYCIE = group.Select(UserUsageModel => UserUsageModel.ZUZYCIE).Sum()
                 });
 
-                foreach (var element in test3)
+                foreach (var element in grouppedByDateTime)
                 {
                     if (element.DATACZAS < toDate && element.DATACZAS >= fromDate)
                     {
-                        searchParameters4.Add(new UserUsageModel { DATACZAS = element.DATACZAS, ZUZYCIE = element.ZUZYCIE });
+                        searchParametersAllUsersGroupedDateTime.Add(new UserUsageModel { DATACZAS = element.DATACZAS, ZUZYCIE = element.ZUZYCIE });
                     }
                 }
 
-                return searchParameters4;
+                return searchParametersAllUsersGroupedDateTime;
             }
 
             double productionForAHour = 0;
@@ -145,9 +140,9 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return searchParametersHourAllUsers;
         }
 
-        public List<UserUsageModel> ReturnListDetailed()
+        public List<UserUsageModel> ReturnListDetailed(string csvPath = @"D:\PULPIT\MTomczak_TEST.csv")
         {
-            var csvTable = LoadCSV();
+            var csvTable = LoadCSV(csvPath);
             List<UserUsageModel> searchParameters = new List<UserUsageModel>();
             for (int i = 0; i < csvTable.Rows.Count; i++)
             {
@@ -170,13 +165,9 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return searchParameters;
         }
 
-        public List<SolarProductionDataModel> ReturnListSolar(bool forADay = false, bool forAHour = false)
+        public List<SolarProductionDataModel> ReturnListSolar(bool forADay = false, bool forAHour = false, string csvString = @"D:\PULPIT\daneslonecznezprodukcja.csv")
         {
-            //DateTime fromDate = new DateTime(2019, 4, 1);
-            ////DateTime toDate = new DateTime(2019, 11, 1);
-            //DateTime toDate = new DateTime(2019, 4, 15);
-
-            var csvTable = LoadCSV(@"D:\PULPIT\daneslonecznezprodukcja.csv");
+            var csvTable = LoadCSV(csvString);
             List<SolarProductionDataModel> solarHourlyProduction = new List<SolarProductionDataModel>();
             List<SolarProductionDataModel> solarMinutesProduction = new List<SolarProductionDataModel>();
             List<SolarProductionDataModel> solarDailyProductionValues = new List<SolarProductionDataModel>();
@@ -221,15 +212,12 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return solarMinutesProduction;
         }
 
-        public List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false)
+        public List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false, string csvLink = @"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv")
         {
             double maxProduction = 5917.243;
             double installedPower = 20;
-            //DateTime fromDate = new DateTime(2019, 4, 1);
-            ////DateTime toDate = new DateTime(2019, 11, 1);
-            //DateTime toDate = new DateTime(2019, 4, 15);
 
-            var csvTable = LoadCSV(@"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv");
+            var csvTable = LoadCSV(csvLink);
             List<WindProductionDataModel> windProduction = new List<WindProductionDataModel>();
             List<WindProductionDataModel> windHourlyProduction = new List<WindProductionDataModel>();
             List<WindProductionDataModel> windMinutesProduction = new List<WindProductionDataModel>();

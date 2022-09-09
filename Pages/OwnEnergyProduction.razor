@@ -2,6 +2,7 @@
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using System.Drawing
+@inject AppState AppState
 
 <PageTitle>Zaaktualizuj produkcje energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
@@ -12,19 +13,6 @@
         <button @onclick=GetValuet>Aktualizuj wykres</button>         <button @onclick=DeleteValuet>Wyczyść wykres</button>
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
-
-  <div class="container">
-  <div class="row">
-    <div class="col-sm">
-  <div class="form-group">
-    <div class="col-sm">
-     <label for="ApplyCSVForProduction">Załącz plik produkcji energii słonecznej</label>
-    <input type="file" class="form-control" id="ApplyCSVForProduction" aria-describedby="applyCSVForProduction" placeholder="Załącz CSV produkcji energii słonecznej">
-    </div>
-  </div>
-</div>
-    </div>
-        </div>
     </div>
 
 @code {
@@ -67,7 +55,7 @@
     protected override void OnInitialized()
     {
                 GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.productionOfSolarEnergy);
 
         _config = new LineConfig
             {
