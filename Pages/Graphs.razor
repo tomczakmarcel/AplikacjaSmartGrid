@@ -5,6 +5,7 @@
 @using AplikacjaSmartGrid.Graphs.Services;
 @using System.Drawing
 @inject NavigationManager NavManager
+@inject AppState AppState
 
 <PageTitle>Strona Główna</PageTitle>
 <div class="d-flex justify-content-center"><h1>Smart Grid App</h1></div>
@@ -13,31 +14,40 @@
 <div class="row">
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
+            <div class="col text-center">
     <button @onclick="RedirectToUseOfEnergySite">Aktualizuj zużycie</button>
     </div>
+    </div>
+
     <div class="col-sm justify-content-center">
     <Chart Config="_config2" @ref="_chart2"></Chart>
+            <div class="col text-center">
     <button @onclick="RedirectToEnergyProductionSite">Aktualizuj produkcje energii</button>
     </div>
-        <div class="col-sm" justify-content-center>
+    </div>
+
+    <div class="col-sm justify-content-center">
     <Chart Config="_config3" @ref="_chart3"></Chart>
+            <div class="col text-center">
     <button @onclick="RedirectToWindAndOthersEnergyProductionSite">Aktualizuj zewnętrznych dostawców energii</button>
     </div>
+    </div>
 </div>
+
 <div class="row">
     <div class="col-sm justify-content-center">
-    <Chart Config="_config4" @ref="_chart4"></Chart>
-    <button @onclick="RedirectToEnergyBalance">Sprawdź balans energii</button>
+            <Chart Config="_config4" @ref="_chart4"></Chart>
+            <div class="col text-center">
+            <button @onclick="RedirectToEnergyBalance">Sprawdź balans energii</button>
+            </div>
     </div>
-        <div class="col-sm justify-content-center">
-    <Chart Config="_config5" @ref="_chart5"></Chart>
-@*
-    <button @onclick="RandomizeData">Randomize Data</button>
-    </div>
-        <div class="col-sm" justify-content-center>
-    <Chart Config="_config6" @ref="_chart6"></Chart>*@
 
-    <button @onclick="RandomizeData">Randomize Data</button>
+    <div class="col-sm justify-content-center">
+       <Chart Config="_config5" @ref="_chart5"></Chart>
+
+        <div class="col text-center">
+        <button @onclick="RedirectToEnergyBalanceEV">Sprawdź dzienny balans energii z autami elektrycznymi</button>
+        </div>
     </div>
 </div>
 
@@ -58,17 +68,23 @@
 
     protected override void OnInitialized()
     {
-
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true);
-        List<UserUsageModel> userUsageModel2 = importCSVService.ReturnList(false, false);
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.usageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy);
         List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
         List<String> ppes = new List<String>();
         List<string> time = new List<string>();
         List<string> timeTrimmed = new List<string>();
         GetDatasetService getDatasetService = new GetDatasetService();
         CalculateEnergyBalanceService calculateEnergyBalanceService = new CalculateEnergyBalanceService();
+
+        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
+        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
+        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy);
+
+        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
+        var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
 
         _config = LineConfigPreparation("Dzienne zużycie energii elektrycznej", "Dni", "kW/h");
 
@@ -80,49 +96,22 @@
 
         _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h");
 
-
-        IDataset<int> dataset1 = new LineDataset<int>(RandomScalingFactor(InitalCount))
-        {
-            Label = "Własna produkcja dzienna",
-            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Red),
-            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Red),
-            Fill = FillingMode.Disabled
-        };
-
-        IDataset<double> datasetUserUsage = new LineDataset<double>()
-        {
-            Label = "Zuzycie energii elektrycznej",
-            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
-            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
-            Fill = FillingMode.Disabled
-        };
-
-        IDataset<double> datasetUserSolarProduction = new LineDataset<double>()
-        {
-            Label = "Produkcja energii elektrycznej",
-            BackgroundColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
-            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
-            Fill = FillingMode.Disabled
-        };
-
-        IDataset<int> dataset3 = new BarDataset<int>(RandomScalingFactor(InitalCount))
-        {
-            Label = "My second dataset",
-            BackgroundColor = ColorUtil.FromDrawingColor(Color.FromArgb(128, ChartColors.Blue)),
-            BorderColor = ColorUtil.FromDrawingColor(ChartColors.Blue),
-            BorderWidth = 1
-        };
-
         ppes = getDatasetService.GetAllClients(userUsageModel);
         time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);  
 
-        foreach (string testo in time)
+        foreach (string partOfTime in time)
         {
-            int indexOf = testo.IndexOf(' ');
+            int indexOf = partOfTime.IndexOf(' ');
             string newString = string.Empty;
-            newString = testo.Substring(0, indexOf);
+            newString = partOfTime.Substring(0, indexOf);
             timeTrimmed.Add(newString);
         }
+
+        EVService eVService = new EVService();
+        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore);
+        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
 
         LineDataset<double> actualUserUsage = new LineDataset<double>();
         actualUserUsage = getDatasetService.GetAllDataset(userUsageModel);
@@ -131,20 +120,23 @@
         _config.Data.Labels.AddRange(timeTrimmed);
 
         var solarProduction = getDatasetService.GetOnlySolarProductionDataset(solarProductionModel);
+        solarProduction.Label = "Wszyscy klienci";
         _config2.Data.Labels.AddRange(timeTrimmed);
         _config2.Data.Datasets.Add(solarProduction);
 
         var windProduction = getDatasetService.GetOnlyWindProductionDataset(windProductionModel);
+        windProduction.Label = "Wszyscy klienci";
         _config3.Data.Labels.AddRange(timeTrimmed);
         _config3.Data.Datasets.Add(windProduction);
 
         energyBalanceModel = calculateEnergyBalanceService.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
         var energyBalanceDataset = getDatasetService.GetEnergyBalance(energyBalanceModel);
+        energyBalanceDataset.Label = "Wszyscy klienci";
         _config4.Data.Labels.AddRange(timeTrimmed);
         _config4.Data.Datasets.Add(energyBalanceDataset);
 
-        var listOfEnergyBalanceAfterEVs = test2();
         var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs, true);
+        energyBalanceAfterEVDataset.Label = "Wszyscy klienci";
 
         _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h", Convert.ToInt32(energyBalanceDataset.Max()), Convert.ToInt32(energyBalanceDataset.Min()));
         _config5.Data.Labels.AddRange(timeTrimmed);
@@ -170,6 +162,11 @@
     {
         NavManager.NavigateTo("/energybalance");
     }
+    
+    private void RedirectToEnergyBalanceEV()
+    {
+        NavManager.NavigateTo("/energybalanceev");
+    }
 
     private void RandomizeData()
     {
@@ -181,146 +178,6 @@
         }
 
         _chart.Update();
-    }
-
-    public List<EnergyBalanceModel> test2()
-    {
-        GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(true, false);
-        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, false);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, false);
-
-        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
-
-        List<EVEnergyBalanceModel> listEVBalance = new List<EVEnergyBalanceModel>();
-        EVEnergyBalanceModel car1 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car2 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car3 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car4 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car5 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car6 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car7 = new EVEnergyBalanceModel();
-        EVEnergyBalanceModel car8 = new EVEnergyBalanceModel();
-        Dictionary<DayOfWeek, TimeOnly> carGetOut = new Dictionary<DayOfWeek, TimeOnly>();
-        TimeOnly mondayFridayTimeOut = new TimeOnly(7, 0);
-        carGetOut.Add(DayOfWeek.Monday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Tuesday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Wednesday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Thursday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Friday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Saturday, mondayFridayTimeOut);
-        carGetOut.Add(DayOfWeek.Sunday, mondayFridayTimeOut);
-
-        Dictionary<DayOfWeek, TimeOnly> carGetIn = new Dictionary<DayOfWeek, TimeOnly>();
-        TimeOnly mondayFridayTimeIn = new TimeOnly(16, 0);
-        carGetIn.Add(DayOfWeek.Monday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Tuesday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Wednesday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Thursday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Friday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Saturday, mondayFridayTimeIn);
-        carGetIn.Add(DayOfWeek.Sunday, mondayFridayTimeIn);
-
-        Dictionary<DayOfWeek, TimeOnly> carGetOut2 = new Dictionary<DayOfWeek, TimeOnly>();
-        TimeOnly mondayFridayTimeOut2 = new TimeOnly(1, 59);
-        carGetOut2.Add(DayOfWeek.Monday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Tuesday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Wednesday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Thursday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Friday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Saturday, mondayFridayTimeOut);
-        carGetOut2.Add(DayOfWeek.Sunday, mondayFridayTimeOut);
-
-        Dictionary<DayOfWeek, TimeOnly> carGetIn2 = new Dictionary<DayOfWeek, TimeOnly>();
-        TimeOnly mondayFridayTimeIn2 = new TimeOnly(2, 0);
-        carGetIn2.Add(DayOfWeek.Monday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Tuesday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Wednesday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Thursday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Friday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Saturday, mondayFridayTimeIn);
-        carGetIn2.Add(DayOfWeek.Sunday, mondayFridayTimeIn);
-
-        car1.Id = 0;
-        car1.MaxEnergy = 70;
-        car1.StoredEnergy = new List<double>();
-        car1.StoredEnergy.Add(35.0);
-        car1.LoadedEnergyForAMinute = 0;
-        car1.CarOutOfGridTime = carGetOut;
-        car1.CarComeBackToGridTime = carGetIn;
-
-        car2.Id = 1;
-        car2.MaxEnergy = 60;
-        car2.StoredEnergy = new List<double>();
-        car2.StoredEnergy.Add(35.0);
-        car2.LoadedEnergyForAMinute = 0;
-        car2.CarOutOfGridTime = carGetOut;
-        car2.CarComeBackToGridTime = carGetIn;
-
-        car3.Id = 2;
-        car3.MaxEnergy = 70;
-        car3.StoredEnergy = new List<double>();
-        car3.StoredEnergy.Add(40.0);
-        car3.LoadedEnergyForAMinute = 0;
-        car3.CarOutOfGridTime = carGetOut2;
-        car3.CarComeBackToGridTime = carGetIn2;
-
-        car4.Id = 3;
-        car4.MaxEnergy = 70;
-        car4.StoredEnergy = new List<double>();
-        car4.StoredEnergy.Add(35.0);
-        car4.LoadedEnergyForAMinute = 0;
-        car4.CarOutOfGridTime = carGetOut2;
-        car4.CarComeBackToGridTime = carGetIn2;
-
-        car5.Id = 4;
-        car5.MaxEnergy = 70;
-        car5.StoredEnergy = new List<double>();
-        car5.StoredEnergy.Add(60.0);
-        car5.LoadedEnergyForAMinute = 0;
-        car5.CarOutOfGridTime = carGetOut2;
-        car5.CarComeBackToGridTime = carGetIn2;
-
-        car6.Id = 5;
-        car6.MaxEnergy = 70;
-        car6.StoredEnergy = new List<double>();
-        car6.StoredEnergy.Add(35.0);
-        car6.LoadedEnergyForAMinute = 0;
-        car6.CarOutOfGridTime = carGetOut2;
-        car6.CarComeBackToGridTime = carGetIn2;
-
-        car7.Id = 6;
-        car7.MaxEnergy = 700;
-        car7.StoredEnergy = new List<double>();
-        car7.StoredEnergy.Add(350.0);
-        car7.LoadedEnergyForAMinute = 0;
-        car7.CarOutOfGridTime = carGetOut2;
-        car7.CarComeBackToGridTime = carGetIn2;
-
-        car8.Id = 7;
-        car8.MaxEnergy = 700;
-        car8.StoredEnergy = new List<double>();
-        car8.StoredEnergy.Add(350.0);
-        car8.LoadedEnergyForAMinute = 0;
-        car8.CarOutOfGridTime = carGetOut2;
-        car8.CarComeBackToGridTime = carGetIn2;
-
-        listEVBalance.Add(car1);
-        listEVBalance.Add(car2);
-        listEVBalance.Add(car3);
-        listEVBalance.Add(car4);
-        listEVBalance.Add(car5);
-        listEVBalance.Add(car6);
-        listEVBalance.Add(car7);
-        listEVBalance.Add(car8);
-
-        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(listEVBalance, energyBalance);
-        //var test = EVservice.GetValuesBeforeUsage(energyBalance, listEVBalance);
-        //EVEnergyBalanceService EVservice2 = new EVEnergyBalanceService(test, energyBalance);
-        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
-
-        return listOfEnergyBalanceAfterEVs;
     }
 
 

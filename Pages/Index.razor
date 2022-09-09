@@ -4,6 +4,7 @@
 @using AplikacjaSmartGrid.Graphs.Model;
 @using System.Drawing
 @inject NavigationManager NavManager
+@inject AppState AppState
 
 <PageTitle>Strona Główna</PageTitle>
 <div class="d-flex justify-content-center"><h1>Smart Grid App</h1></div>
@@ -15,18 +16,28 @@
                     </div>
                     <div class="col-">
                         <label for="ApplyCSVForProductionWind">Załącz plik produkcji energii wiatrowej</label>
-                    <input type="file" class="form-control" id="ApplyCSVForProductionWind" aria-describedby="ApplyCSVForProductionWind" placeholder="Załącz CSV produkcji energii wiatrowej">
-                                            <label for="ApplyCSVOfUsage">Załącz plik zużycia energii</label>
-                    <input type="file" class="form-control" id="ApplyCSVOfUsage" aria-describedby="ApplyCSVOfUsage" placeholder="Załącz plik CSV zużycia energii">
-                                            <label for="ApplyCSVForProductionSolar">Załącz plik produkcji energii słonecznej</label>
-                    <input type="file" class="form-control" id="ApplyCSVForProductionSolar" aria-describedby="ApplyCSVForProductionSolar" placeholder="Załącz CSV produkcji energii słonecznej">
-                     <label for="applyCalendarStart">Wybierz dzień początku symulacji</label>
-    <input type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
+                    <input @bind-value="ApplyCSVForProductionWind" type="text" class="form-control" id="ApplyCSVForProductionWind" aria-describedby="ApplyCSVForProductionWind" placeholder="Załącz CSV produkcji energii wiatrowej">
+                    <label for="ApplyCSVOfUsage">Załącz plik zużycia energii</label>
+
+                    <input @bind-value="ApplyCSVOfUsage" type="text" class="form-control" id="ApplyCSVOfUsage" aria-describedby="ApplyCSVOfUsage" placeholder="Załącz plik CSV zużycia energii">
+                    <label for="ApplyCSVForProductionSolar">Załącz plik produkcji energii słonecznej</label>
+
+                    <input @bind-value="ApplyCSVForProductionSolar" type="text" class="form-control" id="ApplyCSVForProductionSolar" aria-describedby="ApplyCSVForProductionSolar" placeholder="Załącz CSV produkcji energii słonecznej">
+                    <label for="ApplyCSVForProductionSolar">Załącz CSV z listą aut w symulacji"</label>
+
+                    <input @bind-value="ApplyCSVForCarList" type="text" class="form-control" id="ApplyCSVForCarList" aria-describedby="ApplyCSVForCarList" placeholder="Załącz CSV z listą aut w symulacji">
+                     <label for="ApplyCSVForCarList">Wybierz dzień początku symulacji</label>
+
+                     <input @bind-value="applyCalendarStart" type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
                          <label for="applyCalendarStart">Wybierz dzień końca symulacji</label>
-    <input type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
+
+                    <input @bind-value="applyCalendarEnd" type="date" class="form-control" id="applyCalendarEnd" aria-describedby="applyCalendarEnd" placeholder="">
                     </div>
                      <div class="col-lg-">
                     </div>
+                        <div class="col-sm justify-content-center">
+                            <button @onclick="CalculateEnergyBalanceFromInputs">Sprawdź balans energii</button>
+                        </div>
                 </div>
             </div>
         </div>
@@ -34,5 +45,21 @@
 
 
 @code {
+    string ApplyCSVForProductionWind;
+    string ApplyCSVOfUsage;
+    string ApplyCSVForProductionSolar;
+    string ApplyCSVForCarList;
+    DateTime applyCalendarStart;
+    DateTime applyCalendarEnd;
 
+    private void CalculateEnergyBalanceFromInputs()
+    {
+        AppState.productionOfWindEnergy = ApplyCSVForProductionWind;
+        AppState.usageOfEnergyList = ApplyCSVOfUsage;
+        AppState.carListAtTheGrid = ApplyCSVForCarList;
+        AppState.productionOfSolarEnergy = ApplyCSVForProductionSolar;
+        AppState.dateStartOfSimulation = applyCalendarStart;
+        AppState.dateEndOfSimulation = applyCalendarEnd;
+        NavManager.NavigateTo("/Graphs");
+    }
 }

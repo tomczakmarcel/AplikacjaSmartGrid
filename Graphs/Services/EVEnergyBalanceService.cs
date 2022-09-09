@@ -41,7 +41,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 TimeOnly? comeBackToGridTime = EVList[j]?.CarComeBackToGridTime?[day];
                 TimeOnly? outOfGridTime = EVList[j]?.CarOutOfGridTime?[day];
 
-                bool OutOfGrid = comeBackToGridTime > time && outOfGridTime <= time; //napisz test do tego
+                bool OutOfGrid = comeBackToGridTime > time && outOfGridTime <= time;
 
                 if (OutOfGrid)
                 {
@@ -93,7 +93,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
                     if (EVList[p].StoredEnergy[i] >= (EVList[p].MaxEnergy - amountOfEnergy) || Math.Round(EVList[p].LoadedEnergyForAMinute, 3) >= howMuchEnergyCanBeLoadedAt1Minute || energyBalance <= 0 || iDOfCarIsToRemove)
                     {
-                        carsToRemoveFromThisMinute.Add(EVList[p].Id); //szukac Id po where
+                        carsToRemoveFromThisMinute.Add(EVList[p].Id);
                     }
                 }
 

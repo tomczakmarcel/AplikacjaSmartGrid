@@ -2,6 +2,7 @@
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using System.Drawing
+@inject AppState AppState
 
 <PageTitle>Zaaktualizuj zużycie energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Zaaktualizuj zużycie energii</h1></div>
@@ -132,7 +133,7 @@
 
      protected override void OnInitialized()
      {
-           userUsageModel = importCSVService.ReturnListDetailed();
+           userUsageModel = importCSVService.ReturnListDetailed(AppState.usageOfEnergyList);
           _config = new LineConfig
         {
             Options = new LineOptions
