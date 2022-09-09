@@ -7,8 +7,7 @@
 
 <PageTitle>Balans energii</PageTitle>
 <div class="d-flex justify-content-center">
-    <h1>Sprawdź balans energii w poszczególnych dniach</h1>
-    <h1>Bilans po optymalizazacji przy użyciu baterii aut elektrycznych</h1>
+    <h1>Sprawdź balans energii otrzymany po optymalizacji przy użyciu baterii aut elektrycznych w poszczególnych dniach</h1>
     </div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
@@ -38,21 +37,28 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, false, AppState.usageOfEnergyList);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.productionOfWindEnergy);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 
-        var energyBalanceDataset = getDatasetService.GetEnergyBalanceMinutes(energyBalance, CurrentValueStart, CurrentValueEnd);
+        EVService eVService = new EVService();
+        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalance);
+        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
+
+        var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs);
+
         var time = getDatasetService.GetAxisXMinutes(userUsageModel, CurrentValueStart, CurrentValueEnd);
 
-        energyBalanceDataset.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
+        energyBalanceAfterEVDataset.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
 
         if (_config.Data.Labels.Count == 0)
             _config.Data.Labels.AddRange(time);
-        _config.Data.Datasets.Add(energyBalanceDataset);
+        _config.Data.Datasets.Add(energyBalanceAfterEVDataset);
     }
 
     private void DeleteValuet()
@@ -72,7 +78,7 @@
                     Title = new OptionsTitle
                     {
                         Display = true,
-                        Text = "Aktualne zużycie"
+                        Text = "Balans energii"
                     },
                     Tooltips = new Tooltips
                     {
