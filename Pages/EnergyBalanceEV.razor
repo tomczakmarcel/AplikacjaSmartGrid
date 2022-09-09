@@ -1,11 +1,14 @@
-﻿@page "/energyproduction"
+﻿@page "/energybalanceev"
+
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using System.Drawing
 @inject AppState AppState
 
-<PageTitle>Zaaktualizuj produkcje zewnętrzną energii</PageTitle>
-<div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
+<PageTitle>Balans energii</PageTitle>
+<div class="d-flex justify-content-center">
+    <h1>Sprawdź balans energii otrzymany po optymalizacji przy użyciu baterii aut elektrycznych w poszczególnych dniach</h1>
+    </div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
     <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
@@ -21,6 +24,7 @@
 
     ImportCSVService importCSVService = new ImportCSVService();
 
+
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
 
@@ -33,16 +37,28 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.productionOfWindEnergy);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
+        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy);
 
-        var windProduction = getDatasetService.GetOnlyWindProductionDayDataset(windProductionModel, CurrentValueStart, CurrentValueEnd);   
-        var time = getDatasetService.GetAxisXForWindHourly(windProductionModel, CurrentValueStart, CurrentValueEnd);
+        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 
-        windProduction.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
+        EVService eVService = new EVService();
+        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalance);
+        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
+
+        var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs);
+
+        var time = getDatasetService.GetAxisXMinutes(userUsageModel, CurrentValueStart, CurrentValueEnd);
+
+        energyBalanceAfterEVDataset.Label = CurrentValueStart.Date.ToString() + " do " + CurrentValueEnd.Date.ToString();
 
         if (_config.Data.Labels.Count == 0)
             _config.Data.Labels.AddRange(time);
-        _config.Data.Datasets.Add(windProduction);
+        _config.Data.Datasets.Add(energyBalanceAfterEVDataset);
     }
 
     private void DeleteValuet()
@@ -54,9 +70,6 @@
 
     protected override void OnInitialized()
     {
-        GetDatasetService getDatasetService = new GetDatasetService();
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
-
         _config = new LineConfig
             {
                 Options = new LineOptions
@@ -65,7 +78,7 @@
                     Title = new OptionsTitle
                     {
                         Display = true,
-                        Text = "Aktualne zużycie"
+                        Text = "Balans energii"
                     },
                     Tooltips = new Tooltips
                     {

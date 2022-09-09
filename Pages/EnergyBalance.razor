@@ -3,6 +3,7 @@
 @using ChartJs.Blazor.LineChart
 @using ChartJs.Blazor.BarChart
 @using System.Drawing
+@inject AppState AppState
 
 <PageTitle>Balans energii</PageTitle>
 <div class="d-flex justify-content-center"><h1>Sprawdź balans energii w poszczególnych dniach</h1></div>
@@ -13,20 +14,7 @@
         <button @onclick=GetValuet>Aktualizuj wykres</button>         <button @onclick=DeleteValuet>Wyczyść wykres</button>
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
-
-<div class="container">
-    <div class="row">
-        <div class="col-sm">
-            <div class="form-group">
-                    <div class="col-sm">
-                    <label for="ApplyCSVForProduction">Załącz plik produkcji energii słonecznej</label>
-                    <input type="file" class="form-control" id="ApplyCSVForProduction" aria-describedby="applyCSVForProduction" placeholder="Załącz CSV produkcji energii słonecznej">
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
 
 @code {
     private LineConfig _config;
@@ -47,10 +35,10 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList();
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, false, AppState.usageOfEnergyList);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.productionOfWindEnergy);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 
