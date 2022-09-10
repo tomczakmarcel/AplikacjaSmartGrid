@@ -1,0 +1,78 @@
+﻿@page "/reports"
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.BarChart
+@using AplikacjaSmartGrid.Graphs.Model;
+@using System.Drawing
+@inject NavigationManager NavManager
+@inject AppState AppState
+
+<PageTitle>Strona Główna</PageTitle>
+<div class="d-flex justify-content-center"><h1>Smart Grid App</h1></div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                    <div class="col-lg-">
+                    </div>
+                    <div class="col-">
+                        <label for="ApplyCSVForProductionWind">Podaj folder do którego wyeksportować pliki csv</label>
+                    <input @bind-value="PathToFolder" type="text" class="form-control" id="PathToFolder" aria-describedby="PathToFolder" placeholder="Wybierz folder do zapisania raportów">
+
+                     <label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label>
+                                         <br />
+                        <div class="col-sm justify-content-center">
+                            <button @onclick="GoToReportsAndGenerateThem">Sprawdź balans energii</button>
+                        </div>
+                </div>
+            </div>
+        </div>
+ </div>
+ </div>
+
+
+@code {
+    string PathToFolder = @"D:\PULPIT\PlikiPracaMagisterska\";
+
+    private void GoToReportsAndGenerateThem()
+    {
+        ImportCSVService importCSVService = new ImportCSVService();
+        GetDatasetService getDatasetService = new GetDatasetService();
+        CalculateEnergyBalanceService calculateEnergyBalanceService = new CalculateEnergyBalanceService();
+        CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
+        EVService eVService = new EVService();
+
+        string pathToFolderEnergyBalance = PathToFolder + "EnergyModel.csv";
+        string pathToFolderEnergyBalanceEV = PathToFolder + "EVEnergyModel.csv";
+
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.usageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy);
+        List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
+
+        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy);
+
+        var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
+        var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
+
+        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore);
+        var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
+
+        PrintReportToFolder(pathToFolderEnergyBalance, energyBalanceBefore);
+        PrintReportToFolder(pathToFolderEnergyBalanceEV, listOfEnergyBalanceAfterEVs);
+    }
+
+    private void PrintReportToFolder(string Path, List<EnergyBalanceModel> listEnergyBalance)
+    {
+        using (var file = File.CreateText(Path))
+        {
+            foreach(var arr in listEnergyBalance)
+            {
+                file.WriteLine(arr);
+            }
+        }
+    }
+}

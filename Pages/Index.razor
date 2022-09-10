@@ -26,15 +26,9 @@
                     <label for="ApplyCSVForProductionSolar">Załącz CSV z listą aut w symulacji"</label>
 
                     <input @bind-value="ApplyCSVForCarList" type="text" class="form-control" id="ApplyCSVForCarList" aria-describedby="ApplyCSVForCarList" placeholder="Załącz CSV z listą aut w symulacji">
-                     <label for="ApplyCSVForCarList">Wybierz dzień początku symulacji</label>
-
-                     <input @bind-value="applyCalendarStart" type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
-                         <label for="applyCalendarStart">Wybierz dzień końca symulacji</label>
-
-                    <input @bind-value="applyCalendarEnd" type="date" class="form-control" id="applyCalendarEnd" aria-describedby="applyCalendarEnd" placeholder="">
-                    </div>
-                     <div class="col-lg-">
-                    </div>
+                    <br />
+                     <label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label>
+                                         <br />
                         <div class="col-sm justify-content-center">
                             <button @onclick="CalculateEnergyBalanceFromInputs">Sprawdź balans energii</button>
                         </div>
@@ -42,15 +36,14 @@
             </div>
         </div>
  </div>
+ </div>
 
 
 @code {
-    string ApplyCSVForProductionWind;
-    string ApplyCSVOfUsage;
-    string ApplyCSVForProductionSolar;
-    string ApplyCSVForCarList;
-    DateTime applyCalendarStart;
-    DateTime applyCalendarEnd;
+    string ApplyCSVForProductionWind = @"D:\PULPIT\PlikiPracaMagisterska\DaneWiatroweProdukcja.csv";
+    string ApplyCSVOfUsage = @"D:\PULPIT\PlikiPracaMagisterska\ZuzycieUzytkownikow.csv";
+    string ApplyCSVForProductionSolar = @"D:\PULPIT\PlikiPracaMagisterska\DaneSloneczneProdukcja.csv";
+    string ApplyCSVForCarList = @"D:\PULPIT\PlikiPracaMagisterska\auta10.csv";
 
     private void CalculateEnergyBalanceFromInputs()
     {
@@ -58,8 +51,6 @@
         AppState.usageOfEnergyList = ApplyCSVOfUsage;
         AppState.carListAtTheGrid = ApplyCSVForCarList;
         AppState.productionOfSolarEnergy = ApplyCSVForProductionSolar;
-        AppState.dateStartOfSimulation = applyCalendarStart;
-        AppState.dateEndOfSimulation = applyCalendarEnd;
         NavManager.NavigateTo("/Graphs");
     }
 }

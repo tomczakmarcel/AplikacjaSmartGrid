@@ -43,7 +43,6 @@ namespace AplikacjaSmartGrid.Graphs.Services
 
                 if (czas2 <= toDate && czas2 >= fromDate)
                 {
-                    DateTime test = Convert.ToDateTime("31.03.2019 03:00:00");
                     string dateTime = csvTable.Rows[i][1].ToString() + " " + csvTable.Rows[i][2].ToString();
                     string newDateTime = dateTime.Replace('.', '-');
                     string format = "M-d-yyyy HH:mm";
