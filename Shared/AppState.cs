@@ -1,4 +1,7 @@
-﻿namespace AplikacjaSmartGrid.Shared
+﻿using AplikacjaSmartGrid.Graphs.Model;
+using System.Data;
+
+namespace AplikacjaSmartGrid.Shared
 {
     public class AppState
     {
@@ -6,7 +9,5 @@
         public string usageOfEnergyList { get; set; }
         public string productionOfSolarEnergy { get; set; }
         public string carListAtTheGrid { get; set; }
-        public DateTime dateStartOfSimulation { get; set; }
-        public DateTime dateEndOfSimulation { get; set; }
     }
 }

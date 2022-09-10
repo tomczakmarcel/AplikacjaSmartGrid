@@ -19,32 +19,36 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/EnergyBalance.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW5lcmd5QmFsYW5jZS5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/EnergyBalanceEV.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW5lcmd5QmFsYW5jZUVWLnJhem9y
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/EnergyProduction.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW5lcmd5UHJvZHVjdGlvbi5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/Graphs.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/GraphsSites/EnergyBalance.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzU2l0ZXNcRW5lcmd5QmFsYW5jZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/GraphsSites/EnergyBalanceEV.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzU2l0ZXNcRW5lcmd5QmFsYW5jZUVWLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/GraphsSites/EnergyProduction.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzU2l0ZXNcRW5lcmd5UHJvZHVjdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/GraphsSites/OwnEnergyProduction.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzU2l0ZXNcT3duRW5lcmd5UHJvZHVjdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/GraphsSites/UseOfEnergyPage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JhcGhzU2l0ZXNcVXNlT2ZFbmVyZ3lQYWdlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/OwnEnergyProduction.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3duRW5lcmd5UHJvZHVjdGlvbi5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/UseOfEnergyPage.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlT2ZFbmVyZ3lQYWdlLnJhem9y
+[C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Pages/Reports.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVwb3J0cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Marcel/source/repos/AplikacjaSmartGrid/Shared/SurveyPrompt.razor]
