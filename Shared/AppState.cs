@@ -9,5 +9,6 @@ namespace AplikacjaSmartGrid.Shared
         public string usageOfEnergyList { get; set; }
         public string productionOfSolarEnergy { get; set; }
         public string carListAtTheGrid { get; set; }
+        public double installedPower { get; set; }
     }
 }

@@ -211,10 +211,9 @@ namespace AplikacjaSmartGrid.Graphs.Services
             return solarMinutesProduction;
         }
 
-        public List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false, string csvLink = @"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv")
+        public List<WindProductionDataModel> ReturnListWind(bool forADay = false, bool forAHour = false, string csvLink = @"D:\PULPIT\OZEProdukcjaPL\elektrowniewiatrowezuzycie2019.csv", double installedPower = 20)
         {
             double maxProduction = 5917.243;
-            double installedPower = 20;
 
             var csvTable = LoadCSV(csvLink);
             List<WindProductionDataModel> windProduction = new List<WindProductionDataModel>();

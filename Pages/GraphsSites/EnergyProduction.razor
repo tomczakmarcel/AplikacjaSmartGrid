@@ -55,7 +55,7 @@
     protected override void OnInitialized()
     {
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.productionOfWindEnergy, AppState.installedPower);
 
         _config = new LineConfig
             {
