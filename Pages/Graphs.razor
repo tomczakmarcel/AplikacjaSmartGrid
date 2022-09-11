@@ -70,7 +70,7 @@
     {
         List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.usageOfEnergyList);
         List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy, AppState.installedPower);
         List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
         List<String> ppes = new List<String>();
         List<string> time = new List<string>();
@@ -81,7 +81,7 @@
         List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
         List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy);
+        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy, AppState.installedPower);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
         var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);

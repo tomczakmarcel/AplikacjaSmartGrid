@@ -15,17 +15,21 @@
                     <div class="col-lg-">
                     </div>
                     <div class="col-">
-                        <label for="ApplyCSVForProductionWind">Załącz plik produkcji energii wiatrowej</label>
+
+                    <label for="ApplyCSVForProductionWind">Załącz plik produkcji energii wiatrowej</label>
                     <input @bind-value="ApplyCSVForProductionWind" type="text" class="form-control" id="ApplyCSVForProductionWind" aria-describedby="ApplyCSVForProductionWind" placeholder="Załącz CSV produkcji energii wiatrowej">
-                    <label for="ApplyCSVOfUsage">Załącz plik zużycia energii</label>
-
+                    
+                    <label for="ApplyCSVOfUsage">Załącz plik zużycia energii</label> 
                     <input @bind-value="ApplyCSVOfUsage" type="text" class="form-control" id="ApplyCSVOfUsage" aria-describedby="ApplyCSVOfUsage" placeholder="Załącz plik CSV zużycia energii">
+                    
                     <label for="ApplyCSVForProductionSolar">Załącz plik produkcji energii słonecznej</label>
-
                     <input @bind-value="ApplyCSVForProductionSolar" type="text" class="form-control" id="ApplyCSVForProductionSolar" aria-describedby="ApplyCSVForProductionSolar" placeholder="Załącz CSV produkcji energii słonecznej">
+                    
                     <label for="ApplyCSVForProductionSolar">Załącz CSV z listą aut w symulacji"</label>
-
                     <input @bind-value="ApplyCSVForCarList" type="text" class="form-control" id="ApplyCSVForCarList" aria-describedby="ApplyCSVForCarList" placeholder="Załącz CSV z listą aut w symulacji">
+
+                    <label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych"</label>
+                    <input @bind-value="WindPower" type="number" class="form-control" id="WindPower" aria-describedby="WindPower" placeholder="Wpisz nominalną moc elektrowni wiatrowych">
                     <br />
                      <label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label>
                                          <br />
@@ -44,6 +48,7 @@
     string ApplyCSVOfUsage = @"D:\PULPIT\PlikiPracaMagisterska\ZuzycieUzytkownikow.csv";
     string ApplyCSVForProductionSolar = @"D:\PULPIT\PlikiPracaMagisterska\DaneSloneczneProdukcja.csv";
     string ApplyCSVForCarList = @"D:\PULPIT\PlikiPracaMagisterska\auta10.csv";
+    double WindPower = 20;
 
     private void CalculateEnergyBalanceFromInputs()
     {
@@ -51,6 +56,7 @@
         AppState.usageOfEnergyList = ApplyCSVOfUsage;
         AppState.carListAtTheGrid = ApplyCSVForCarList;
         AppState.productionOfSolarEnergy = ApplyCSVForProductionSolar;
+        AppState.installedPower = WindPower;
         NavManager.NavigateTo("/Graphs");
     }
 }
