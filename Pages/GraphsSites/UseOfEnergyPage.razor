@@ -5,7 +5,7 @@
 @inject AppState AppState
 
 <PageTitle>Zaaktualizuj zużycie energii</PageTitle>
-<div class="d-flex justify-content-center"><h1>Zaaktualizuj zużycie energii</h1></div>
+<div class="d-flex justify-content-center"><h1>Szczegółowe dane dotyczące zużycia energii elektrycznej</h1></div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
     <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
@@ -54,25 +54,6 @@
                     maxValue = dataset.Max() + 0.5;
                 }
                 dataset.Label = client;
-                _config.Options.Scales.YAxes = new List<CartesianAxis>
-                                            {
-                                                    new LinearCartesianAxis
-                                                    {
-                                                        ScaleLabel = new ScaleLabel
-                                                        {
-                                                            LabelString = "Time"
-                                                        },
-                                                        GridLines = new GridLines
-                                                        {
-                                                            Display = false
-                                                        },
-                                                        Ticks = new LinearCartesianTicks
-                                                        {
-                                                            Min = 0,
-                                                            Max = maxValue
-                                                        }
-                                                    }
-                                                };
                 _config.Data.Datasets.Add(dataset);
                 maxValue2 = maxValue;
             }
@@ -133,51 +114,53 @@
 
      protected override void OnInitialized()
      {
-           userUsageModel = importCSVService.ReturnListDetailed(AppState.usageOfEnergyList);
-          _config = new LineConfig
-        {
-            Options = new LineOptions
-            {
-                Responsive = true,
-                Title = new OptionsTitle
-                {
-                    Display = true,
-                    Text = "Aktualne zużycie"
-                },
-                Tooltips = new Tooltips
-                {
-                    Mode = InteractionMode.Nearest,
-                    Intersect = true
-                },
-                Hover = new Hover
-                {
-                    Mode = InteractionMode.Nearest,
-                    Intersect = true
-                },
-                Scales = new Scales
-                {
-                    XAxes = new List<CartesianAxis>
+           userUsageModel = importCSVService.ReturnListDetailed(AppState.UsageOfEnergyList);
+                _config = new LineConfig
                     {
-                        new CategoryAxis
+                        Options = new LineOptions
                         {
-                            ScaleLabel = new ScaleLabel
+                            Responsive = true,
+                            Title = new OptionsTitle
                             {
-                                LabelString = "Time"
+                                Display = true,
+                                Text = "Zużycie energii elektrycznej"
+                            },
+                            Tooltips = new Tooltips
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Hover = new Hover
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Scales = new Scales
+                            {
+                                XAxes = new List<CartesianAxis>
+                                {
+                                    new CategoryAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "Godziny"
+                                        }
+                                    }
+                                },
+                                YAxes = new List<CartesianAxis>
+                                {
+                                    new LinearCartesianAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "kWh"
+                                        }
+                                    }
+                                }
                             }
                         }
-                    },
-                    YAxes = new List<CartesianAxis>
-                    {
-                        new LinearCartesianAxis
-                        {
-                            ScaleLabel = new ScaleLabel
-                            {
-                                LabelString = "kW/h"
-                            }
-                        }
-                    }
-                }
-            }
-        };
+                    };
     }
 }

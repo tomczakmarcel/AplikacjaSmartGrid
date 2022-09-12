@@ -5,7 +5,7 @@
 @inject AppState AppState
 
 <PageTitle>Zaaktualizuj produkcje energii</PageTitle>
-<div class="d-flex justify-content-center"><h1>Zaaktualizuj produkcje energii</h1></div>
+<div class="d-flex justify-content-center"><h1>Szczegółowe informacje dotyczące produkcji energii przez panele fotowoltaiczne</h1></div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
     <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
@@ -22,7 +22,7 @@
     private DateTime CurrentValueStart { get; set; }
     private DateTime CurrentValueEnd { get; set; }
 
-            ImportCSVService importCSVService = new ImportCSVService();
+    ImportCSVService importCSVService = new ImportCSVService();
 
     private DateTime NewValueStart { get; set; }
     private DateTime NewValueEnd { get; set; }
@@ -33,7 +33,7 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.ProductionOfSolarEnergy);
 
         var solarProduction = getDatasetService.GetOnlySolarProductionDayDataset(solarProductionModel, CurrentValueStart, CurrentValueEnd);   
         var time = getDatasetService.GetAxisXForSolarHourly(solarProductionModel, CurrentValueStart, CurrentValueEnd);
@@ -55,52 +55,54 @@
     protected override void OnInitialized()
     {
                 GetDatasetService getDatasetService = new GetDatasetService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.productionOfSolarEnergy);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.ProductionOfSolarEnergy);
 
-        _config = new LineConfig
-            {
-                Options = new LineOptions
-                {
-                    Responsive = true,
-                    Title = new OptionsTitle
+   _config = new LineConfig
                     {
-                        Display = true,
-                        Text = "Aktualne zużycie"
-                    },
-                    Tooltips = new Tooltips
-                    {
-                        Mode = InteractionMode.Nearest,
-                        Intersect = true
-                    },
-                    Hover = new Hover
-                    {
-                        Mode = InteractionMode.Nearest,
-                        Intersect = true
-                    },
-                    Scales = new Scales
-                    {
-                        XAxes = new List<CartesianAxis>
-                    {
-                        new CategoryAxis
+                        Options = new LineOptions
                         {
-                            ScaleLabel = new ScaleLabel
+                            Responsive = true,
+                            Title = new OptionsTitle
                             {
-                                LabelString = "Time"
+                                Display = true,
+                                Text = "Produkcja energii elektrycznej z paneli fotowoltaicznych"
+                            },
+                            Tooltips = new Tooltips
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Hover = new Hover
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Scales = new Scales
+                            {
+                                XAxes = new List<CartesianAxis>
+                                {
+                                    new CategoryAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "Godziny"
+                                        }
+                                    }
+                                },
+                                YAxes = new List<CartesianAxis>
+                                {
+                                    new LinearCartesianAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "kWh"
+                                        }
+                                    }
+                                }
                             }
                         }
-                    },
-                        YAxes = new List<CartesianAxis>
-                    {
-                        new LinearCartesianAxis
-                        {
-                            ScaleLabel = new ScaleLabel
-                            {
-                                LabelString = "Kw/h"
-                            }
-                        }
-                    }
-                    }
-                }
-            };
+                    };
     }
 }

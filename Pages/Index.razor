@@ -16,22 +16,32 @@
                     </div>
                     <div class="col-">
 
-                    <label for="ApplyCSVForProductionWind">Załącz plik produkcji energii wiatrowej</label>
+                    <b><label for="ApplyCSVForProductionWind">Załącz plik produkcji energii wiatrowej:</label></b>
                     <input @bind-value="ApplyCSVForProductionWind" type="text" class="form-control" id="ApplyCSVForProductionWind" aria-describedby="ApplyCSVForProductionWind" placeholder="Załącz CSV produkcji energii wiatrowej">
                     
-                    <label for="ApplyCSVOfUsage">Załącz plik zużycia energii</label> 
+                    <b><label for="ApplyCSVOfUsage">Załącz plik zużycia energii:</label></b> 
                     <input @bind-value="ApplyCSVOfUsage" type="text" class="form-control" id="ApplyCSVOfUsage" aria-describedby="ApplyCSVOfUsage" placeholder="Załącz plik CSV zużycia energii">
                     
-                    <label for="ApplyCSVForProductionSolar">Załącz plik produkcji energii słonecznej</label>
+                    <b><label for="ApplyCSVForProductionSolar">Załącz plik produkcji energii słonecznej:</label></b>
                     <input @bind-value="ApplyCSVForProductionSolar" type="text" class="form-control" id="ApplyCSVForProductionSolar" aria-describedby="ApplyCSVForProductionSolar" placeholder="Załącz CSV produkcji energii słonecznej">
                     
-                    <label for="ApplyCSVForProductionSolar">Załącz CSV z listą aut w symulacji"</label>
+                    <b><label for="ApplyCSVForProductionSolar">Załącz CSV z listą aut w symulacji:</label></b>
                     <input @bind-value="ApplyCSVForCarList" type="text" class="form-control" id="ApplyCSVForCarList" aria-describedby="ApplyCSVForCarList" placeholder="Załącz CSV z listą aut w symulacji">
 
-                    <label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych"</label>
-                    <input @bind-value="WindPower" type="number" class="form-control" id="WindPower" aria-describedby="WindPower" placeholder="Wpisz nominalną moc elektrowni wiatrowych">
+                    <b><label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych w analizowanej sieci [kW]:</label></b>
+                    <input @bind-value="WindPower" type="number" class="form-control" id="WindPower" aria-describedby="WindPower" placeholder="Wpisz nominalną moc elektrowni wiatrowych [kW]">
+
+                                        <b><label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych w analizowanej sieci [kWh]:</label></b>
+                    <input @bind-value="howMuchEnergyCanEVDonateToGridForAMinute" type="number" class="form-control" id="howMuchEnergyCanEVDonateToGridForAMinute" aria-describedby="howMuchEnergyCanEVDonateToGridForAMinute" placeholder="Wpisz ile kilowatogodzin na minutę auto będzie w stanie oddać do sieci [kWh]">
+
+                                        <b><label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych w analizowanej sieci [kWh]:</label></b>
+                    <input @bind-value="howMuchEnergyCanEVLoadFromGridForAMinute" type="number" class="form-control" id="howMuchEnergyCanEVLoadFromGridForAMinute" aria-describedby="howMuchEnergyCanEVLoadFromGridForAMinute" placeholder="Wpisz ile kilowatogodzin na minutę auto będzie w stanie ładować swoje akumulatory [kWh]">
+
+                                        <b><label for="ApplyCSVForProductionSolar">Wpisz nominalną moc elektrowni wiatrowych w analizowanej sieci [kWh]:</label></b>
+                    <input @bind-value="usageOfEVCarsDaily" type="number" class="form-control" id="usageOfEVCarsDaily" aria-describedby="usageOfEVCarsDaily" placeholder="Wpisz dzienne zużycie energii dla aut elektrycznych [kWh]">
+
                     <br />
-                     <label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label>
+                     <b><label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label></b>
                                          <br />
                         <div class="col-sm justify-content-center">
                             <button @onclick="CalculateEnergyBalanceFromInputs">Sprawdź balans energii</button>
@@ -44,19 +54,25 @@
 
 
 @code {
-    string ApplyCSVForProductionWind = @"D:\PULPIT\PlikiPracaMagisterska\DaneWiatroweProdukcja.csv";
-    string ApplyCSVOfUsage = @"D:\PULPIT\PlikiPracaMagisterska\ZuzycieUzytkownikow.csv";
-    string ApplyCSVForProductionSolar = @"D:\PULPIT\PlikiPracaMagisterska\DaneSloneczneProdukcja.csv";
-    string ApplyCSVForCarList = @"D:\PULPIT\PlikiPracaMagisterska\auta10.csv";
+    string ApplyCSVForProductionWind = @"D:\PULPIT\PlikiDoPracyMagisterskiej\DaneProdukcjiEnergiiWiatrowej.csv";
+    string ApplyCSVOfUsage = @"D:\PULPIT\PlikiDoPracyMagisterskiej\ZuzycieEnergiiPrzezUzytkownikow.csv";
+    string ApplyCSVForProductionSolar = @"D:\PULPIT\PlikiDoPracyMagisterskiej\DaneProdukcjiEnergiizPV.csv";
+    string ApplyCSVForCarList = @"D:\PULPIT\PlikiDoPracyMagisterskiej\Lista10EV.csv";
     double WindPower = 20;
+    double howMuchEnergyCanEVDonateToGridForAMinute = 0.4;
+    double howMuchEnergyCanEVLoadFromGridForAMinute = 0.4;
+    double usageOfEVCarsDaily = 4;
 
     private void CalculateEnergyBalanceFromInputs()
     {
-        AppState.productionOfWindEnergy = ApplyCSVForProductionWind;
-        AppState.usageOfEnergyList = ApplyCSVOfUsage;
-        AppState.carListAtTheGrid = ApplyCSVForCarList;
-        AppState.productionOfSolarEnergy = ApplyCSVForProductionSolar;
-        AppState.installedPower = WindPower;
+        AppState.ProductionOfWindEnergy = ApplyCSVForProductionWind;
+        AppState.UsageOfEnergyList = ApplyCSVOfUsage;
+        AppState.CarListAtTheGrid = ApplyCSVForCarList;
+        AppState.ProductionOfSolarEnergy = ApplyCSVForProductionSolar;
+        AppState.InstalledPower = WindPower;
+        AppState.HowMuchEnergyCanEVDonateToGridForAMinute = WindPower;
+        AppState.HowMuchEnergyCanEVLoadFromGridForAMinute = WindPower;
+        AppState.UsageOfEVCarsDaily = WindPower;
         NavManager.NavigateTo("/Graphs");
     }
 }

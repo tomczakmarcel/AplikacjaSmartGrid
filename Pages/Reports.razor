@@ -24,10 +24,10 @@
                             <button @onclick="GoToReportsAndGenerateThem">Sprawdź balans energii</button>
                         </div>
 
-                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfSurplusBeforeEvs </label>
-                           <label> Sumaryczna wartość deficytu energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfDeficitBeforeEvs </label>
-                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfSurplusAfterEvs </label>
-                           <label> Sumaryczna wartość deficytu energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfDeficitAfterEvs </label>
+                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfSurplusBeforeEvs kWh</label>
+                           <label> Sumaryczna wartość deficytu energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfDeficitBeforeEvs kWh</label>
+                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfSurplusAfterEvs kWh</label>
+                           <label> Sumaryczna wartość deficytu energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfDeficitAfterEvs kWh</label>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
 
 
 @code {
-    string PathToFolder = @"D:\PULPIT\PlikiPracaMagisterska\";
+    string PathToFolder = @"D:\PULPIT\PlikiDoPracyMagisterskiej";
     double EnergyBalanceSumOfSurplusBeforeEvs = 0;
     double EnergyBalanceSumOfDeficitBeforeEvs = 0;
     double EnergyBalanceSumOfSurplusAfterEvs = 0;
@@ -53,21 +53,21 @@
         string pathToFolderEnergyBalance = PathToFolder + "EnergyModel.csv";
         string pathToFolderEnergyBalanceEV = PathToFolder + "EVEnergyModel.csv";
 
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.usageOfEnergyList);
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy, AppState.installedPower);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.UsageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.ProductionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.ProductionOfWindEnergy, AppState.InstalledPower);
         List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
 
-        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
-        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy, AppState.installedPower);
+        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.UsageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.ProductionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.ProductionOfWindEnergy, AppState.InstalledPower);
         List<EnergyBalanceModel> energyBalanceBeforeForCalculation = new List<EnergyBalanceModel>();
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
         var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
         energyBalanceBeforeForCalculation = energyBalanceBefore;
 
-        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+        var eVList = eVService.getEVListFromCSV(AppState.CarListAtTheGrid);
 
         var energyBalanceBeforeEVsSurplus = from r in energyBalanceBeforeForCalculation
                                            where r.EnergyBalance > 0
@@ -81,7 +81,7 @@
 
         EnergyBalanceSumOfDeficitBeforeEvs = energyBalanceBeforeEVsNegative.Sum(x => x.EnergyBalance);
 
-        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore);
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore, AppState.UsageOfEVCarsDaily, AppState.HowMuchEnergyCanEVLoadFromGridForAMinute, AppState.HowMuchEnergyCanEVDonateToGridForAMinute);
         var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
 
         PrintReportToFolder(pathToFolderEnergyBalance, energyBalanceBefore);

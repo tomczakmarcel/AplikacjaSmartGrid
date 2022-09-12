@@ -1,14 +1,18 @@
-﻿using AplikacjaSmartGrid.Graphs.Model;
-using System.Data;
-
-namespace AplikacjaSmartGrid.Shared
+﻿namespace AplikacjaSmartGrid.Shared
 {
     public class AppState
     {
-        public string productionOfWindEnergy { get; set; }
-        public string usageOfEnergyList { get; set; }
-        public string productionOfSolarEnergy { get; set; }
-        public string carListAtTheGrid { get; set; }
-        public double installedPower { get; set; }
+        public AppState()
+        {
+        }
+
+        public string? ProductionOfWindEnergy { get; set; }
+        public string? UsageOfEnergyList { get; set; }
+        public string? ProductionOfSolarEnergy { get; set; }
+        public string? CarListAtTheGrid { get; set; }
+        public double InstalledPower { get; set; }
+        public double UsageOfEVCarsDaily { get; set; }
+        public double HowMuchEnergyCanEVDonateToGridForAMinute { get; set; }
+        public double HowMuchEnergyCanEVLoadFromGridForAMinute { get; set; }
     }
 }
