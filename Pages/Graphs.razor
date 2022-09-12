@@ -15,21 +15,21 @@
     <div class="col-sm justify-content-center">
     <Chart Config="_config" @ref="_chart"></Chart>
             <div class="col text-center">
-    <button @onclick="RedirectToUseOfEnergySite">Aktualizuj zużycie</button>
+    <button @onclick="RedirectToUseOfEnergySite">Szczegółowe informacje o zużyciu energii elektrycznej</button>
     </div>
     </div>
 
     <div class="col-sm justify-content-center">
     <Chart Config="_config2" @ref="_chart2"></Chart>
             <div class="col text-center">
-    <button @onclick="RedirectToEnergyProductionSite">Aktualizuj produkcje energii</button>
+    <button @onclick="RedirectToEnergyProductionSite">Szczegółowe informacje o produkcji energii elektrycznej z paneli fotowoltaicznych</button>
     </div>
     </div>
 
     <div class="col-sm justify-content-center">
     <Chart Config="_config3" @ref="_chart3"></Chart>
             <div class="col text-center">
-    <button @onclick="RedirectToWindAndOthersEnergyProductionSite">Aktualizuj zewnętrznych dostawców energii</button>
+    <button @onclick="RedirectToWindAndOthersEnergyProductionSite">Szczegółowe informacje o produkcji energii elektrycznej z elektrowni wiatrowych</button>
     </div>
     </div>
 </div>
@@ -38,7 +38,7 @@
     <div class="col-sm justify-content-center">
             <Chart Config="_config4" @ref="_chart4"></Chart>
             <div class="col text-center">
-            <button @onclick="RedirectToEnergyBalance">Sprawdź balans energii</button>
+            <button @onclick="RedirectToEnergyBalance">Sprawdź szczegółowy balans energii</button>
             </div>
     </div>
 
@@ -46,7 +46,7 @@
        <Chart Config="_config5" @ref="_chart5"></Chart>
 
         <div class="col text-center">
-        <button @onclick="RedirectToEnergyBalanceEV">Sprawdź dzienny balans energii z autami elektrycznymi</button>
+        <button @onclick="RedirectToEnergyBalanceEV">Sprawdź szczegółowy dzienny balans energii z autami elektrycznymi</button>
         </div>
     </div>
 </div>
@@ -68,9 +68,9 @@
 
     protected override void OnInitialized()
     {
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.usageOfEnergyList);
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.productionOfWindEnergy, AppState.installedPower);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, true, AppState.UsageOfEnergyList);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(true, false, AppState.ProductionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(true, false, AppState.ProductionOfWindEnergy, AppState.InstalledPower);
         List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
         List<String> ppes = new List<String>();
         List<string> time = new List<string>();
@@ -78,23 +78,23 @@
         GetDatasetService getDatasetService = new GetDatasetService();
         CalculateEnergyBalanceService calculateEnergyBalanceService = new CalculateEnergyBalanceService();
 
-        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.usageOfEnergyList);
+        List<UserUsageModel> userUsageModelForEnergyBalance = importCSVService.ReturnList(true, false, AppState.UsageOfEnergyList);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.productionOfWindEnergy, AppState.installedPower);
+        List<SolarProductionDataModel> solarProductionModelForEnergyBalance = importCSVService.ReturnListSolar(false, false, AppState.ProductionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModelForEnergyBalance = importCSVService.ReturnListWind(false, false, AppState.ProductionOfWindEnergy, AppState.InstalledPower);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
         var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
 
-        _config = LineConfigPreparation("Dzienne zużycie energii elektrycznej", "Dni", "kW/h");
+        _config = LineConfigPreparation("Dzienne zużycie energii elektrycznej", "Dni", "kWh");
 
-        _config2 = LineConfigPreparation("Produkcja energii elektrycznej z energii słonecznej", "Dni", "kW/h");
+        _config2 = LineConfigPreparation("Produkcja energii elektrycznej z energii słonecznej", "Dni", "kWh");
 
-        _config3 = LineConfigPreparation("Produkcja energii elektrycznej z energii wiatrowej", "Dni", "kW/h");
+        _config3 = LineConfigPreparation("Produkcja energii elektrycznej z energii wiatrowej", "Dni", "kWh");
 
-        _config4 = LineConfigPreparation("Bilans Końcowy Energii bez aut elektrycznych", "Dni", "kW/h");
+        _config4 = LineConfigPreparation("Bilans Końcowy Energii bez aut elektrycznych", "Dni", "kWh");
 
-        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h");
+        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kWh");
 
         ppes = getDatasetService.GetAllClients(userUsageModel);
         time = getDatasetService.GetAxisX(userUsageModel, ppes[0]);  
@@ -108,9 +108,9 @@
         }
 
         EVService eVService = new EVService();
-        var eVList = eVService.getEVListFromCSV(AppState.carListAtTheGrid);
+        var eVList = eVService.getEVListFromCSV(AppState.CarListAtTheGrid);
 
-        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore);
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore, AppState.UsageOfEVCarsDaily, AppState.HowMuchEnergyCanEVLoadFromGridForAMinute, AppState.HowMuchEnergyCanEVDonateToGridForAMinute);
         var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
 
         LineDataset<double> actualUserUsage = new LineDataset<double>();
@@ -138,7 +138,7 @@
         var energyBalanceAfterEVDataset = getDatasetService.GetEnergyBalance(listOfEnergyBalanceAfterEVs, true);
         energyBalanceAfterEVDataset.Label = "Wszyscy klienci";
 
-        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kW/h", Convert.ToInt32(energyBalanceDataset.Max()), Convert.ToInt32(energyBalanceDataset.Min()));
+        _config5 = LineConfigPreparationEnergyBalance("Bilans Końcowy Energii z autami elektrycznych", "Dni", "kWh", Convert.ToInt32(energyBalanceDataset.Max()), Convert.ToInt32(energyBalanceDataset.Min()));
         _config5.Data.Labels.AddRange(timeTrimmed);
         _config5.Data.Datasets.Add(energyBalanceAfterEVDataset);
     }

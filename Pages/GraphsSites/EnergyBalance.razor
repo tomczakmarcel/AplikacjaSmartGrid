@@ -6,7 +6,7 @@
 @inject AppState AppState
 
 <PageTitle>Balans energii</PageTitle>
-<div class="d-flex justify-content-center"><h1>Sprawdź balans energii w poszczególnych dniach</h1></div>
+<div class="d-flex justify-content-center"><h1>Szczegółowe informacje dotyczące balansu energii w określonym dniu</h1></div>
     <div class="col-sm">
      <label for="applyCalendarStart">Wybierz dzień który chcesz zobaczyć na wykresie</label>
     <input @bind-value=NewValueStart type="date" class="form-control" id="applyCalendarStart" aria-describedby="applyCalendarStart" placeholder="">
@@ -35,10 +35,10 @@
         CurrentValueEnd =  NewValueStart.AddDays(1);
 
         GetDatasetService getDatasetService = new GetDatasetService();
-        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, false, AppState.usageOfEnergyList);
+        List<UserUsageModel> userUsageModel = importCSVService.ReturnList(false, false, AppState.UsageOfEnergyList);
         CalculateEnergyBalanceService calculateEnergyBalance = new CalculateEnergyBalanceService();
-        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.productionOfSolarEnergy);
-        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.productionOfWindEnergy, AppState.installedPower);
+        List<SolarProductionDataModel> solarProductionModel = importCSVService.ReturnListSolar(false, true, AppState.ProductionOfSolarEnergy);
+        List<WindProductionDataModel> windProductionModel = importCSVService.ReturnListWind(false, true, AppState.ProductionOfWindEnergy, AppState.InstalledPower);
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
 
@@ -61,50 +61,52 @@
 
     protected override void OnInitialized()
     {
-        _config = new LineConfig
-            {
-                Options = new LineOptions
-                {
-                    Responsive = true,
-                    Title = new OptionsTitle
+         _config = new LineConfig
                     {
-                        Display = true,
-                        Text = "Aktualne zużycie"
-                    },
-                    Tooltips = new Tooltips
-                    {
-                        Mode = InteractionMode.Nearest,
-                        Intersect = true
-                    },
-                    Hover = new Hover
-                    {
-                        Mode = InteractionMode.Nearest,
-                        Intersect = true
-                    },
-                    Scales = new Scales
-                    {
-                        XAxes = new List<CartesianAxis>
-                    {
-                        new CategoryAxis
+                        Options = new LineOptions
                         {
-                            ScaleLabel = new ScaleLabel
+                            Responsive = true,
+                            Title = new OptionsTitle
                             {
-                                LabelString = "Time"
+                                Display = true,
+                                Text = "Balans energii elektrycznej po optymalizacji z użyciem aut elektrycznych"
+                            },
+                            Tooltips = new Tooltips
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Hover = new Hover
+                            {
+                                Mode = InteractionMode.Nearest,
+                                Intersect = true
+                            },
+                            Scales = new Scales
+                            {
+                                XAxes = new List<CartesianAxis>
+                                {
+                                    new CategoryAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "Godziny"
+                                        }
+                                    }
+                                },
+                                YAxes = new List<CartesianAxis>
+                                {
+                                    new LinearCartesianAxis
+                                    {
+                                        ScaleLabel = new ScaleLabel
+                                        {
+                                            Display = true,
+                                            LabelString = "kWh"
+                                        }
+                                    }
+                                }
                             }
                         }
-                    },
-                        YAxes = new List<CartesianAxis>
-                    {
-                        new LinearCartesianAxis
-                        {
-                            ScaleLabel = new ScaleLabel
-                            {
-                                LabelString = "Kw/h"
-                            }
-                        }
-                    }
-                    }
-                }
-            };
+                    };
     }
 }

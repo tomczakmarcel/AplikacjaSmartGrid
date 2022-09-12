@@ -8,17 +8,17 @@ namespace AplikacjaSmartGrid.Graphs.Services
         private List<EVEnergyBalanceModel> EVList;
         private List<EnergyBalanceModel> EnergyBalanceList;
         private double usageOfKWh;
-        private double howMuchEnergyCanBeLoadedAt1Minute; // 0.116
-        private double howMuchEnergyCanBeDeloadedAt1Minute; //0.4
+        private double howMuchEnergyCanBeLoadedAt1Minute;
+        private double howMuchEnergyCanBeDeloadedAt1Minute; 
         private double quotientForEnergyBalance;
 
-        public EVEnergyBalanceService(List<EVEnergyBalanceModel> EV, List<EnergyBalanceModel> EnergyBalance, double NewkWh = 3, double deload = 0.116, double load = 0.4, double quotientForEnergyBalanceCalculation = 1000)
+        public EVEnergyBalanceService(List<EVEnergyBalanceModel> EV, List<EnergyBalanceModel> EnergyBalance, double NewkWh = 3, double ValueOfEnergyCanBeLoadedAt1Minute = 0.116, double ValueOfEnergyCanBeDeloadedAt1Minute = 0.4, double quotientForEnergyBalanceCalculation = 1000)
         {
             EVList = EV;
             EnergyBalanceList = EnergyBalance;
             usageOfKWh = NewkWh;
-            howMuchEnergyCanBeDeloadedAt1Minute = deload;
-            howMuchEnergyCanBeLoadedAt1Minute = load;
+            howMuchEnergyCanBeDeloadedAt1Minute = ValueOfEnergyCanBeDeloadedAt1Minute;
+            howMuchEnergyCanBeLoadedAt1Minute =  ValueOfEnergyCanBeLoadedAt1Minute;
             quotientForEnergyBalance = quotientForEnergyBalanceCalculation;
         }
 
@@ -183,12 +183,7 @@ namespace AplikacjaSmartGrid.Graphs.Services
             {
                 var day = EnergyBalanceList[i].DateOfProduction.DayOfWeek;
                 var hour = TimeOnly.FromDateTime(EnergyBalanceList[i].DateOfProduction);
-
                 energyBalance = EnergyBalanceList[i].EnergyBalance;
-                var test = EnergyBalanceList[i].DateOfProduction;
-                DateTime fromDatex = new DateTime(2019, 7, 6, 18, 27, 0);
-                if (test == fromDatex)
-                    Console.WriteLine("Xd");
 
                 if (i > 0)
                     GetUpdatedList(i);
