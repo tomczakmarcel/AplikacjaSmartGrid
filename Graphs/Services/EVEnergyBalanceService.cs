@@ -22,6 +22,51 @@ namespace AplikacjaSmartGrid.Graphs.Services
             quotientForEnergyBalance = quotientForEnergyBalanceCalculation;
         }
 
+        public List<EnergyBalanceModel> GetEVEnergyBalance()
+        {
+            double energyBalance = 0;
+            var minutesToGo = EnergyBalanceList.Count;
+
+            for (int i = 0; i < minutesToGo; i++)
+            {
+                var day = EnergyBalanceList[i].DateOfProduction.DayOfWeek;
+                var hour = TimeOnly.FromDateTime(EnergyBalanceList[i].DateOfProduction);
+                energyBalance = EnergyBalanceList[i].EnergyBalance;
+
+                if (i > 0)
+                    GetUpdatedList(i);
+
+                var carsOutsideOfGrid = UpdateListWithCarsThatOutOfGrid(day, hour, i, usageOfKWh);
+
+                if (carsOutsideOfGrid.Count == EVList.Count)
+                    continue;
+
+                foreach (var EV in EVList)
+                {
+                    if (!carsOutsideOfGrid.Contains(EV.Id) && EV.StoredEnergy[i] <= EV.MaxEnergy / 2)
+                    {
+                        EV.StoredEnergy[i] += howMuchEnergyCanBeLoadedAt1Minute;
+                        carsOutsideOfGrid.Add(EV.Id);
+                        EnergyBalanceList[i].EnergyBalance -= howMuchEnergyCanBeLoadedAt1Minute;
+                    }
+                }
+
+                if (energyBalance > 0)
+                {
+                    LoadUpCarsFromPositiveEnergyBalance(energyBalance, i, carsOutsideOfGrid);
+                    continue;
+                }
+
+                if (energyBalance < 0)
+                {
+                    SupportEnergyBalanceFromEV(energyBalance, i, carsOutsideOfGrid);
+                    continue;
+                }
+            }
+
+            return EnergyBalanceList;
+        }
+
         public void GetUpdatedList(int iteration)
         {
             for (int y = 0; y < EVList.Count; y++)
@@ -84,14 +129,16 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 {
                     bool iDOfCarIsToRemove = carsToRemove.Contains(EVList[p].Id);
 
-                    if (EVList[p].StoredEnergy[i] < (EVList[p].MaxEnergy - amountOfEnergy) && energyBalance > 0 && EVList[p].LoadedEnergyForAMinute <= howMuchEnergyCanBeLoadedAt1Minute && !iDOfCarIsToRemove)
+                    if (EVList[p].StoredEnergy[i] < (EVList[p].MaxEnergy - amountOfEnergy) && energyBalance > 0 
+                        && EVList[p].LoadedEnergyForAMinute <= howMuchEnergyCanBeLoadedAt1Minute && !iDOfCarIsToRemove)
                     {
                         energyBalance -= amountOfEnergy;
                         EVList[p].StoredEnergy[i] += amountOfEnergy;
                         EVList[p].LoadedEnergyForAMinute += amountOfEnergy;
                     }
 
-                    if (EVList[p].StoredEnergy[i] >= (EVList[p].MaxEnergy - amountOfEnergy) || Math.Round(EVList[p].LoadedEnergyForAMinute, 3) >= howMuchEnergyCanBeLoadedAt1Minute || energyBalance <= 0 || iDOfCarIsToRemove)
+                    if (EVList[p].StoredEnergy[i] >= (EVList[p].MaxEnergy - amountOfEnergy) || Math.Round(EVList[p].LoadedEnergyForAMinute, 3) >= howMuchEnergyCanBeLoadedAt1Minute 
+                        || energyBalance <= 0 || iDOfCarIsToRemove)
                     {
                         carsToRemoveFromThisMinute.Add(EVList[p].Id);
                     }
@@ -141,14 +188,17 @@ namespace AplikacjaSmartGrid.Graphs.Services
                 {
                     bool idOfCarIsToRemove = carsToRemove.Contains(EVList[p].Id);
 
-                    if (EVList[p].StoredEnergy[i] > (EVList[p].MaxEnergy / 2) && energyBalance < 0 && Math.Abs(EVList[p].LoadedEnergyForAMinute) <= howMuchEnergyCanBeDeloadedAt1Minute && !idOfCarIsToRemove)
+                    if (EVList[p].StoredEnergy[i] > (EVList[p].MaxEnergy / 2) && energyBalance < 0 
+                        && Math.Abs(EVList[p].LoadedEnergyForAMinute) <= howMuchEnergyCanBeDeloadedAt1Minute && !idOfCarIsToRemove)
                     {
                         energyBalance += amountOfEnergy;
                         EVList[p].StoredEnergy[i] -= amountOfEnergy;
                         EVList[p].LoadedEnergyForAMinute -= amountOfEnergy;
                     }
 
-                    if (EVList[p].StoredEnergy[i] <= (EVList[p].MaxEnergy / 2) || Math.Abs(Math.Round(EVList[p].LoadedEnergyForAMinute, 2)) >= howMuchEnergyCanBeDeloadedAt1Minute || energyBalance >= 0 || idOfCarIsToRemove)
+                    if (EVList[p].StoredEnergy[i] <= (EVList[p].MaxEnergy / 2) 
+                        || Math.Abs(Math.Round(EVList[p].LoadedEnergyForAMinute, 2)) >= howMuchEnergyCanBeDeloadedAt1Minute 
+                        || energyBalance >= 0 || idOfCarIsToRemove)
                     {
                         carsToRemoveFromThisMinute.Add(EVList[p].Id);
                     }
@@ -172,51 +222,6 @@ namespace AplikacjaSmartGrid.Graphs.Services
             } while (continueCalculation);
 
             EnergyBalanceList[i].EnergyBalance = energyBalance;
-        }
-
-        public List<EnergyBalanceModel> GetEVEnergyBalance()
-        {
-            double energyBalance = 0;
-            var minutesToGo = EnergyBalanceList.Count;
-
-            for (int i = 0; i < minutesToGo; i++)
-            {
-                var day = EnergyBalanceList[i].DateOfProduction.DayOfWeek;
-                var hour = TimeOnly.FromDateTime(EnergyBalanceList[i].DateOfProduction);
-                energyBalance = EnergyBalanceList[i].EnergyBalance;
-
-                if (i > 0)
-                    GetUpdatedList(i);
-
-                var carsOutsideOfGrid = UpdateListWithCarsThatOutOfGrid(day, hour, i, usageOfKWh);
-
-                if (carsOutsideOfGrid.Count == EVList.Count)
-                    continue;
-
-                foreach (var EV in EVList)
-                {
-                    if (!carsOutsideOfGrid.Contains(EV.Id) && EV.StoredEnergy[i] <= EV.MaxEnergy/2)
-                    {
-                        EV.StoredEnergy[i] += howMuchEnergyCanBeLoadedAt1Minute;
-                        carsOutsideOfGrid.Add(EV.Id);
-                        EnergyBalanceList[i].EnergyBalance -= howMuchEnergyCanBeLoadedAt1Minute;
-                    }
-                }
-
-                if (energyBalance > 0)
-                {
-                    LoadUpCarsFromPositiveEnergyBalance(energyBalance, i, carsOutsideOfGrid);
-                    continue;
-                }
-
-                if (energyBalance < 0)
-                {
-                    SupportEnergyBalanceFromEV(energyBalance, i, carsOutsideOfGrid);
-                    continue;
-                }
-            }
-
-            return EnergyBalanceList;
         }
     }
 }

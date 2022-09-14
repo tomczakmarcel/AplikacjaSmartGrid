@@ -64,7 +64,8 @@
         List<EnergyBalanceModel> energyBalanceBeforeForCalculation = new List<EnergyBalanceModel>();
 
         var energyBalance = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModel, windProductionModel, userUsageModel);
-        var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
+        var energyBalanceBefore = calculateEnergyBalance.CalculatedEnergyBalanceModelBeforeBattery(solarProductionModelForEnergyBalance, 
+            windProductionModelForEnergyBalance, userUsageModelForEnergyBalance);
         energyBalanceBeforeForCalculation = energyBalanceBefore;
 
         var eVList = eVService.getEVListFromCSV(AppState.CarListAtTheGrid);
@@ -81,7 +82,8 @@
 
         EnergyBalanceSumOfDeficitBeforeEvs = energyBalanceBeforeEVsNegative.Sum(x => x.EnergyBalance);
 
-        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore, AppState.UsageOfEVCarsDaily, AppState.HowMuchEnergyCanEVLoadFromGridForAMinute, AppState.HowMuchEnergyCanEVDonateToGridForAMinute);
+        EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore, AppState.UsageOfEVCarsDaily, 
+            AppState.HowMuchEnergyCanEVLoadFromGridForAMinute, AppState.HowMuchEnergyCanEVDonateToGridForAMinute);
         var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
 
         PrintReportToFolder(pathToFolderEnergyBalance, energyBalanceBefore);
