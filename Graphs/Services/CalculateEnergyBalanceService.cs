@@ -4,7 +4,8 @@ namespace AplikacjaSmartGrid.Graphs.Services
 {
     public class CalculateEnergyBalanceService
     {
-        public List<EnergyBalanceModel> CalculatedEnergyBalanceModelBeforeBattery(List<SolarProductionDataModel> solarProduction, List<WindProductionDataModel> windProduction, List<UserUsageModel> userUsage)
+        public List<EnergyBalanceModel> CalculatedEnergyBalanceModelBeforeBattery(List<SolarProductionDataModel> solarProduction, 
+            List<WindProductionDataModel> windProduction, List<UserUsageModel> userUsage)
         {
             List<EnergyBalanceModel> energyBalanceModel = new List<EnergyBalanceModel>();
 
