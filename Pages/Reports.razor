@@ -21,13 +21,25 @@
                      <label for="ApplyCSVForCarList">Symulacja zostanie przeprowadzona od 1.04 do 31.10:</label>
                      <br/>
                         <div class="col-sm justify-content-center">
+                     <b><label for="Co2Wind">Wpisz wartość ekwiwalentu CO2/kWh dla energii wyprodukowanej z elektrowni wiatrowych:</label></b>
+                    <input @bind-value="Co2Wind" type="number" class="form-control" id="Co2Wind" aria-describedby="Co2Wind" placeholder="">
+                                         <b><label for="Co2Wind">Wpisz wartość ekwiwalentu CO2/kWh dla energii wyprodukowanej przez panele fotowoltaiczne:</label></b>
+                    <input @bind-value="Co2Solar" type="number" class="form-control" id="Co2Wind" aria-describedby="Co2Wind" placeholder="">
+                                         <b><label for="Co2Wind">Wpisz wartość CO2/kWh dla energii którą należałoby dostarczyć do sieci by pokryć deficyt:</label></b>
+                    <input @bind-value="Co2Rest" type="number" class="form-control" id="Co2Wind" aria-describedby="Co2Wind" placeholder="">
                             <button @onclick="GoToReportsAndGenerateThem">Sprawdź balans energii</button>
                         </div>
 
-                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfSurplusBeforeEvs kWh</label>
-                           <label> Sumaryczna wartość deficytu energii w okresie symulacji bez optymalizacji z udziałem aut elektrycznych: @EnergyBalanceSumOfDeficitBeforeEvs kWh</label>
-                           <label> Sumaryczna wartość nadwyżki energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfSurplusAfterEvs kWh</label>
-                           <label> Sumaryczna wartość deficytu energii w okresie symulacji z optymalizacją poprzez akumulatory aut elektrycznych: @EnergyBalanceSumOfDeficitAfterEvs kWh</label>
+                           <label> Sumaryczna wartość nadwyżki energii w sieci zasilanej przez źródła odnawialne: @EnergyBalanceSumOfSurplusBeforeEvs kWh</label>
+                           <br />
+                           <label> Sumaryczna wartość deficytu energii w sieci zasilanej przez źródła odnawialne: @EnergyBalanceSumOfDeficitBeforeEvs kWh</label>
+                           <br />
+                           <br />
+                           <label> Sumaryczna wartość nadwyżki energii w Inteligentnej sieci zasilanej przez źródła odnawialne: @EnergyBalanceSumOfSurplusAfterEvs kWh</label>
+                           <br />
+                           <label> Sumaryczna wartość deficytu energii w Inteligentnej sieci zasilanej przez źródła odnawialne: @EnergyBalanceSumOfDeficitAfterEvs kWh</label>
+                                                      <br />
+                           <label> Średnia wartość dla zaproponowanego modelu Inteligetnej Sieci Energetycznej CO2/kWh : @Co2PerKwh CO2/kWh</label>
                 </div>
             </div>
         </div>
@@ -41,6 +53,10 @@
     double EnergyBalanceSumOfDeficitBeforeEvs = 0;
     double EnergyBalanceSumOfSurplusAfterEvs = 0;
     double EnergyBalanceSumOfDeficitAfterEvs = 0;
+    double Co2Wind = 34.11;
+    double Co2Solar = 49.91;
+    double Co2Rest = 436;
+    double Co2PerKwh = 0;
 
     private void GoToReportsAndGenerateThem()
     {
@@ -69,37 +85,35 @@
         energyBalanceBeforeForCalculation = energyBalanceBefore;
 
         var eVList = eVService.getEVListFromCSV(AppState.CarListAtTheGrid);
-
         var energyBalanceBeforeEVsSurplus = from r in energyBalanceBeforeForCalculation
-                                           where r.EnergyBalance > 0
-                                           select r;
-
+                                            where r.EnergyBalance > 0
+                                            select r;
         EnergyBalanceSumOfSurplusBeforeEvs = energyBalanceBeforeEVsSurplus.Sum(x => x.EnergyBalance);
-
         var energyBalanceBeforeEVsNegative = from r in energyBalanceBeforeForCalculation
-                                           where r.EnergyBalance < 0
-                                           select r;
-
+                                             where r.EnergyBalance < 0
+                                             select r;
         EnergyBalanceSumOfDeficitBeforeEvs = energyBalanceBeforeEVsNegative.Sum(x => x.EnergyBalance);
-
         EVEnergyBalanceService EVservice = new EVEnergyBalanceService(eVList, energyBalanceBefore, AppState.UsageOfEVCarsDaily, 
             AppState.HowMuchEnergyCanEVLoadFromGridForAMinute, AppState.HowMuchEnergyCanEVDonateToGridForAMinute);
         var listOfEnergyBalanceAfterEVs = EVservice.GetEVEnergyBalance();
-
         PrintReportToFolder(pathToFolderEnergyBalance, energyBalanceBefore);
         PrintReportToFolder(pathToFolderEnergyBalanceEV, listOfEnergyBalanceAfterEVs);
-
         var energyBalanceAfterEVsSurplus = from r in listOfEnergyBalanceAfterEVs
                                            where r.EnergyBalance > 0
                                            select r;
-
         EnergyBalanceSumOfSurplusAfterEvs = energyBalanceAfterEVsSurplus.Sum(x => x.EnergyBalance);
-
         var energyBalanceAfterEVsNegative = from r in listOfEnergyBalanceAfterEVs
-                                           where r.EnergyBalance < 0
-                                           select r;
-
+                                            where r.EnergyBalance < 0
+                                            select r;
         EnergyBalanceSumOfDeficitAfterEvs = energyBalanceAfterEVsNegative.Sum(x => x.EnergyBalance);
+        var sumOfProductionWindEnergy = windProductionModelForEnergyBalance.Sum(x => x.WindProduction);
+        var sumOfProductionSolarEnergy = solarProductionModelForEnergyBalance.Sum(x => x.SolarProduction);
+        var sumOfProductionWindEnergyCo2 = sumOfProductionWindEnergy * Co2Wind;
+        var sumOfProductionSolarEnergyCo2 = sumOfProductionSolarEnergy * Co2Solar;
+        var energyBalanceAfterEVsNegativeCo2 = Math.Abs(EnergyBalanceSumOfDeficitBeforeEvs) * Co2Rest;
+
+        Co2PerKwh = (sumOfProductionWindEnergyCo2 + sumOfProductionSolarEnergyCo2 + energyBalanceAfterEVsNegativeCo2) / 
+        (sumOfProductionWindEnergy + sumOfProductionSolarEnergy + Math.Abs(EnergyBalanceSumOfDeficitBeforeEvs));
     }
 
     private void PrintReportToFolder(string Path, List<EnergyBalanceModel> listEnergyBalance)
